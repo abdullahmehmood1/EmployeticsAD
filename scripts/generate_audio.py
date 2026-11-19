@@ -192,12 +192,18 @@ class KokoroEngine:
     """GPU-accelerated open-weight Kokoro-82M neural TTS engine."""
 
     def __init__(self, voice: str, speed: float = 1.0) -> None:
+        import torch  # type: ignore
         from kokoro import KPipeline  # type: ignore
 
         lang_code = "b" if voice.startswith(("bm_", "bf_")) else "a"
         self.voice = voice
         self.speed = speed
-        self.pipeline = KPipeline(lang_code=lang_code)
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"[Audio] Kokoro-82M running on PyTorch device: {device.upper()}")
+        try:
+            self.pipeline = KPipeline(lang_code=lang_code, device=device)
+        except TypeError:
+            self.pipeline = KPipeline(lang_code=lang_code)
 
     def synthesize(self, text: str) -> tuple[np.ndarray, list[dict[str, Any]]]:
         chunks: list[np.ndarray] = []
@@ -211,6 +217,32 @@ class KokoroEngine:
         audio_48k = signal.resample_poly(audio_24k, 2, 1).astype(np.float32)
         words = estimate_word_timings(text, len(audio_48k) / SAMPLE_RATE)
         return audio_48k, words
+
+
+def synthesize_espeak(
+    text: str,
+    ffmpeg_bin: str,
+    tmp_dir: Path,
+    sid: str,
+) -> tuple[np.ndarray, list[dict[str, Any]]]:
+    """Offline emergency fallback using espeak-ng so audio is never silent."""
+    espeak_bin = shutil.which("espeak-ng") or shutil.which("espeak")
+    if not espeak_bin:
+        raise RuntimeError("espeak-ng not installed.")
+    raw_wav = tmp_dir / f"{sid}_espeak_raw.wav"
+    out_wav = tmp_dir / f"{sid}_espeak.wav"
+    subprocess.run(
+        [espeak_bin, "-v", "en-us", "-s", "158", "-w", str(raw_wav), text],
+        check=True,
+        capture_output=True,
+    )
+    run_ffmpeg(
+        ffmpeg_bin,
+        ["-i", str(raw_wav), "-ar", str(SAMPLE_RATE), "-ac", "1", str(out_wav)],
+    )
+    data, _ = read_wav_float32(out_wav)
+    words = estimate_word_timings(text, len(data) / SAMPLE_RATE)
+    return data, words
 
 
 async def synthesize_edge_tts(
@@ -565,9 +597,7 @@ async def build_all_audio(
             active_engine = "kokoro"
             print("[Audio] Kokoro-82M GPU/Neural engine loaded successfully!")
         except Exception as exc:
-            if engine == "kokoro":
-                raise
-            print(f"[Audio] Kokoro unavailable ({exc}); will try Edge TTS / gTTS fallback.")
+            print(f"[Audio] WARNING: Kokoro unavailable ({exc}); automatically falling back to Edge TTS / gTTS.")
             active_engine = "edge"
 
     vo_master = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
@@ -588,9 +618,16 @@ async def build_all_audio(
             data: np.ndarray | None = None
             words: list[dict[str, Any]] = []
 
+            # Resilient per-scene cascade so voiceover can NEVER fail silently
             if active_engine == "kokoro" and kokoro_runner is not None:
-                data, words = kokoro_runner.synthesize(scene["text"])
-            elif active_engine == "edge":
+                try:
+                    data, words = kokoro_runner.synthesize(scene["text"])
+                except Exception as exc:
+                    print(f"[Audio] WARNING: Kokoro synthesis failed ({exc}); switching to Edge TTS...")
+                    active_engine = "edge"
+                    used_voice_label = edge_voice
+
+            if data is None and active_engine == "edge":
                 try:
                     rate_pct = int(round((speed - 1.0) * 100))
                     rate_str = f"{rate_pct:+d}%"
@@ -598,13 +635,22 @@ async def build_all_audio(
                         scene["text"], edge_voice, rate_str, ffmpeg_bin, tmp_dir, sid
                     )
                 except Exception as exc:
-                    print(f"[Audio] Edge TTS failed ({exc}); falling back to gTTS...")
+                    print(f"[Audio] WARNING: Edge TTS failed ({exc}); switching to gTTS...")
                     active_engine = "gtts"
                     used_voice_label = "gTTS-en-US"
+
+            if data is None and active_engine == "gtts":
+                try:
+                    used_voice_label = "gTTS-en-US"
                     data, words = synthesize_gtts(scene["text"], ffmpeg_bin, tmp_dir, sid)
-            else:
-                used_voice_label = "gTTS-en-US"
-                data, words = synthesize_gtts(scene["text"], ffmpeg_bin, tmp_dir, sid)
+                except Exception as exc:
+                    print(f"[Audio] WARNING: gTTS failed ({exc}); switching to offline espeak-ng...")
+                    active_engine = "espeak"
+                    used_voice_label = "espeak-ng"
+
+            if data is None:
+                used_voice_label = "espeak-ng"
+                data, words = synthesize_espeak(scene["text"], ffmpeg_bin, tmp_dir, sid)
 
             assert data is not None
             trimmed, lead_trimmed = trim_silence(data, SAMPLE_RATE)
@@ -705,7 +751,13 @@ async def build_all_audio(
     }
     MANIFEST_PATH.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
+    vo_rms_db = 20.0 * math.log10(float(np.sqrt(np.mean(vo_master**2))) + 1e-12)
+    master_rms_db = 20.0 * math.log10(float(np.sqrt(np.mean(master**2))) + 1e-12)
+    if vo_rms_db < -60.0:
+        raise RuntimeError(f"Voiceover track appears silent ({vo_rms_db:.1f} dBFS)!")
+
     print(f"[Audio] Engine used : {active_engine} ({used_voice_label})")
+    print(f"[Audio] Loudness    : Voiceover={vo_rms_db:.1f} dBFS | Master={master_rms_db:.1f} dBFS")
     print(f"[Audio] Master WAV  : {master_path}")
     print(f"[Audio] Captions SRT: {srt_path}")
     print(f"[Audio] Manifest    : {MANIFEST_PATH}")

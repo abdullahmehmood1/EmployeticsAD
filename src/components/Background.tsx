@@ -104,6 +104,8 @@ export const Background: React.FC = () => {
         style={{
           background: `radial-gradient(circle 760px at ${orb1X}% ${orb1Y}%, ${primaryGlow} 0%, transparent 72%)`,
           filter: "blur(30px)",
+          transform: "translateZ(0)",
+          willChange: "transform",
         }}
       />
 
@@ -112,6 +114,8 @@ export const Background: React.FC = () => {
         style={{
           background: `radial-gradient(circle 700px at ${orb2X}% ${orb2Y}%, ${secondaryGlow} 0%, transparent 72%)`,
           filter: "blur(36px)",
+          transform: "translateZ(0)",
+          willChange: "transform",
         }}
       />
 

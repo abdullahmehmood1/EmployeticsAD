@@ -1,0 +1,44 @@
+{
+  "voice": "en-US-AndrewMultilingualNeural",
+  "durationSec": 40,
+  "masterAudioFile": "audio/master_audio.wav",
+  "hasGeneratedAudio": false,
+  "segments": [
+    {
+      "sceneId": "scene1",
+      "startSec": 0.25,
+      "endSec": 8.7,
+      "text": "Your best developer just resigned. No warning. But the signs were there: late nights, lost weekends, falling feedback. Hidden in the data."
+    },
+    {
+      "sceneId": "scene2",
+      "startSec": 9.25,
+      "endSec": 15.6,
+      "text": "Employetics reads daily attendance, tasks and feedback, and ranks who is likely to leave."
+    },
+    {
+      "sceneId": "scene3",
+      "startSec": 16.25,
+      "endSec": 23.5,
+      "text": "It also tells you why. Overtime. Falling peer feedback. So you fix the real cause."
+    },
+    {
+      "sceneId": "scene4",
+      "startSec": 24.25,
+      "endSec": 30.6,
+      "text": "Or just ask the HR assistant. It answers in seconds, from your own data."
+    },
+    {
+      "sceneId": "scene5",
+      "startSec": 31.2,
+      "endSec": 34.7,
+      "text": "Act weeks before the resignation letter."
+    },
+    {
+      "sceneId": "scene6",
+      "startSec": 35.2,
+      "endSec": 39.2,
+      "text": "Employetics. Predict burnout. Keep your people."
+    }
+  ]
+}

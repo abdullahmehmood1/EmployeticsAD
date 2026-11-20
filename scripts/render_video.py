@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-Zero-Blink True-NVIDIA-GPU Motion Graphics Render Pipeline (Colab & Local)
+Zero-Blink True-NVIDIA-GPU Kinetic Trailer Render Pipeline (Colab & Local)
 --------------------------------------------------------------------------
-1. Verifies studio voiceover + soundtrack (`public/audio/master_audio.wav`) is present & loud.
-2. Renders 100% deterministic, zero-flicker RGBA motion-graphics UI frames via Remotion
-   (no unstable Chrome EGL GPU crashes, no WebGL canvas async blinking!).
-3. On NVIDIA GPU (Google Colab T4 / L4 / A100):
-   - Runs a real-time PyTorch CUDA GPU Shader & Optical Bloom Compositor directly on GPU:
-     * Smooth domain-warped liquid aurora backdrop synced to all 5 chapters
-     * Physical multi-tap Gaussian optical bloom on bright UI highlights
-     * Alpha-compositing + radial optical vignette + subtle anti-banding grain
-   - Pipes raw RGB frames straight from CUDA GPU into NVIDIA NVENC (`h264_nvenc`)
+1. Verifies studio deep-male voiceover + trailer bass soundtrack (`public/audio/master_audio.wav`).
+2. Renders 100% deterministic, zero-flicker kinetic typography frames via Remotion.
+3. On NVIDIA CUDA GPU (Google Colab L4 / T4 / A100):
+   - Runs a real-time PyTorch CUDA GPU Kinetic Motion-Blur & Mastering Pass directly on GPU:
+     * Directional 1D kinetic motion-blur smear on fast impact wipes & text slams
+     * Preserves 100% pure solid #0F2A52 laptop screen (14-26s) and 100% pure solid #FFFFFF outro (34-40s)
+   - Pipes raw RGB24 frames straight from CUDA GPU into NVIDIA NVENC (`h264_nvenc`)
      while explicitly muxing `public/audio/master_audio.wav` into AAC 256kbps stereo!
 4. Monitors live `nvidia-smi` GPU utilization + VRAM and verifies final MP4 streams & loudness.
 """
@@ -38,6 +36,18 @@ from scipy.io import wavfile
 ROOT_DIR = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT_DIR / "out"
 AUDIO_WAV = ROOT_DIR / "public" / "audio" / "master_audio.wav"
+
+# Exact frame windows where fast kinetic horizontal wipes/slides benefit from GPU directional motion blur
+KINETIC_BLUR_WINDOWS = [
+    (166, 180),    # Hook -> Problem wipe
+    (328, 340),    # LATE NIGHTS -> LOST WEEKENDS wipe
+    (478, 490),    # LOST WEEKENDS -> NOBODY NOTICED wipe
+    (646, 662),    # Problem -> Bright White Reveal wipe
+    (828, 880),    # Reveal slide-out & Laptop slide-in from right
+    (1544, 1562),  # App -> Solution wipe
+    (1804, 1816),  # ACT EARLY -> KEEP YOUR PEOPLE wipe
+    (2040, 2076),  # Solution -> Solid White collapse
+]
 
 
 def find_binary(name: str) -> str | None:
@@ -175,34 +185,21 @@ def sorted_frame_files(frames_dir: Path, ext: str) -> list[Path]:
     return sorted(files, key=frame_num)
 
 
-def interpolate_palette(frame_idx: int) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
-    """Warm Sunlit Editorial Watercolor Palette (Terracotta Dusk -> Amber Clarity -> Botanical Sage -> Warm Gold)."""
-    keyframes = [
-        (0, (0.96, 0.68, 0.52), (0.98, 0.84, 0.58)),     # Scene 1: Warm Apricot & Terracotta Dusk
-        (480, (0.94, 0.58, 0.45), (0.96, 0.78, 0.52)),   # Scene 1 end: Intimate warm ember
-        (600, (0.97, 0.82, 0.54), (0.68, 0.88, 0.74)),   # Scene 2: Sunlit Amber + Soft Eucalyptus
-        (1200, (0.62, 0.86, 0.71), (0.97, 0.86, 0.64)),  # Scene 3: Botanical Private Sanctuary
-        (1860, (0.58, 0.87, 0.70), (0.98, 0.90, 0.66)),  # Scene 4: Breathing Sage & Warm Sunlight
-        (2130, (0.97, 0.85, 0.60), (0.64, 0.86, 0.72)),  # Scene 5: Golden Editorial Brand Finale
-        (2400, (0.96, 0.84, 0.60), (0.68, 0.88, 0.74)),
-    ]
-    for i in range(len(keyframes) - 1):
-        f0, a0, b0 = keyframes[i]
-        f1, a1, b1 = keyframes[i + 1]
-        if f0 <= frame_idx <= f1:
-            t = (frame_idx - f0) / max(1, f1 - f0)
-            c1 = tuple(a0[k] + (a1[k] - a0[k]) * t for k in range(3))
-            c2 = tuple(b0[k] + (b1[k] - b0[k]) * t for k in range(3))
-            return c1, c2
-    return keyframes[-1][1], keyframes[-1][2]
-
-
-def load_rgba_png(path: Path) -> np.ndarray:
+def load_rgb_image(path: Path) -> np.ndarray:
     with Image.open(path) as im:
-        return np.asarray(im.convert("RGBA"), dtype=np.uint8)
+        return np.asarray(im.convert("RGB"), dtype=np.uint8)
 
 
-def cuda_composite_and_nvenc(
+def in_blur_window(frame_idx: int) -> float:
+    for a, b in KINETIC_BLUR_WINDOWS:
+        if a <= frame_idx <= b:
+            mid = 0.5 * (a + b)
+            half = max(1.0, 0.5 * (b - a))
+            return max(0.0, 1.0 - abs(frame_idx - mid) / half)
+    return 0.0
+
+
+def cuda_postprocess_and_nvenc(
     frame_files: list[Path],
     audio_wav: Path,
     output_path: Path,
@@ -211,53 +208,25 @@ def cuda_composite_and_nvenc(
     crf: int,
 ) -> None:
     """
-    True NVIDIA CUDA GPU Compositor:
-    - Generates smooth 60fps liquid aurora shader on CUDA GPU (zero flicker!)
-    - Applies physical separable Gaussian optical bloom on bright UI elements on CUDA GPU
-    - Alpha-composites transparent Remotion RGBA frames + vignette + subtle studio grain
-    - Streams raw RGB24 frames straight into NVIDIA NVENC (`h264_nvenc`) + AAC 256k audio mux
+    PyTorch CUDA GPU Kinetic Motion-Blur & Broadcast Mastering Pass -> NVIDIA NVENC (`h264_nvenc`).
+    Preserves 100% pure solid #0F2A52 laptop screen and 100% pure solid #FFFFFF 34-40s outro plate!
     """
     import torch  # type: ignore
     import torch.nn.functional as F  # type: ignore
 
     device = torch.device("cuda")
-    first = load_rgba_png(frame_files[0])
+    first = load_rgb_image(frame_files[0])
     H, W = first.shape[0], first.shape[1]
 
-    print(f"[CUDA GPU] Initializing {W}x{H} Sunlit Editorial Watercolor + Optical Glow Shader on {torch.cuda.get_device_name(0)}...")
+    print(f"[CUDA GPU] Initializing {W}x{H} Kinetic Motion-Blur & NVENC Master on {torch.cuda.get_device_name(0)}...")
 
-    # Precompute normalized coordinate grid & warm silk linen base on GPU
-    ys = torch.linspace(-1.0, 1.0, H, device=device, dtype=torch.float32)
-    xs = torch.linspace(-1.0, 1.0, W, device=device, dtype=torch.float32)
-    gy, gx = torch.meshgrid(ys, xs, indexing="ij")
-    aspect = W / float(H)
-    px = gx * aspect
-    py = gy
+    # Horizontal directional kinetic motion-blur kernel on CUDA GPU
+    k_len = 15
+    x = torch.linspace(-1.0, 1.0, k_len, device=device, dtype=torch.float32)
+    k_1d = torch.exp(-(x * x) * 2.4)
+    k_1d = k_1d / k_1d.sum()
+    motion_kernel = k_1d.view(1, 1, 1, k_len).repeat(3, 1, 1, 1)
 
-    # Warm Ivory / Alabaster silk canvas gradient (#FCF9F4 -> #EFE6D8)
-    v_grad = (gy * 0.5 + 0.5).unsqueeze(0)  # (1, H, W)
-    base_top = torch.tensor([0.988, 0.976, 0.956], device=device).view(3, 1, 1)
-    base_bot = torch.tensor([0.937, 0.902, 0.847], device=device).view(3, 1, 1)
-    base_canvas = base_bot * v_grad + base_top * (1.0 - v_grad)
-
-    # Subtle tactile fine linen/paper warmth (static micro-texture, zero flicker!)
-    torch.manual_seed(42)
-    paper_grain = (torch.randn((1, H, W), device=device, dtype=torch.float32) * 0.008)
-
-    # Very gentle editorial daylight edge framing
-    rad = torch.sqrt(px * px * 0.45 + py * py * 0.82)
-    vignette = torch.clamp(1.03 - rad * 0.09, 0.90, 1.0).unsqueeze(0)  # (1, H, W)
-
-    # 1D separable Gaussian kernel for soft sunlit halo depth on CUDA GPU
-    k_size = 21
-    sigma = 6.0
-    coords = torch.arange(k_size, device=device, dtype=torch.float32) - (k_size - 1) / 2.0
-    g1d = torch.exp(-(coords * coords) / (2.0 * sigma * sigma))
-    g1d = g1d / g1d.sum()
-    k_h = g1d.view(1, 1, 1, k_size).repeat(3, 1, 1, 1)
-    k_v = g1d.view(1, 1, k_size, 1).repeat(3, 1, 1, 1)
-
-    # Start FFmpeg hardware NVENC (or libx264 fallback) stdin pipe with explicit master_audio.wav mux
     if use_nvenc:
         vcodec_args = [
             "-c:v", "h264_nvenc",
@@ -308,65 +277,33 @@ def cuda_composite_and_nvenc(
 
     try:
         with ThreadPoolExecutor(max_workers=4) as pool, torch.no_grad():
-            # Prefetch queue of decoded RGBA PNGs so GPU never idles waiting on PNG decode
-            futures = [pool.submit(load_rgba_png, p) for p in frame_files[:8]]
+            futures = [pool.submit(load_rgb_image, p) for p in frame_files[:8]]
             next_submit = 8
 
             for idx in range(total):
-                rgba_np = futures[idx].result()
-                futures[idx] = None  # free host RAM immediately
+                rgb_np = futures[idx].result()
+                futures[idx] = None
                 if next_submit < total:
-                    futures.append(pool.submit(load_rgba_png, frame_files[next_submit]))
+                    futures.append(pool.submit(load_rgb_image, frame_files[next_submit]))
                     next_submit += 1
 
-                # Upload RGBA frame to CUDA GPU
-                rgba = torch.from_numpy(rgba_np).to(device, non_blocking=True).float() / 255.0
-                fg_rgb = rgba[..., :3].permute(2, 0, 1)      # (3, H, W)
-                fg_a = rgba[..., 3:4].permute(2, 0, 1)       # (1, H, W)
+                # Upload frame to CUDA GPU
+                frame_t = torch.from_numpy(rgb_np).to(device, non_blocking=True).float() / 255.0
+                chw = frame_t.permute(2, 0, 1).unsqueeze(0)  # (1, 3, H, W)
 
-                # Continuous deterministic GPU Sunlit Watercolor Caustics (zero flicker!)
-                t = idx / 60.0
-                c1_tup, c2_tup = interpolate_palette(idx)
-                c1 = torch.tensor(c1_tup, device=device, dtype=torch.float32).view(3, 1, 1)
-                c2 = torch.tensor(c2_tup, device=device, dtype=torch.float32).view(3, 1, 1)
+                # Apply directional GPU kinetic motion-blur during fast trailer wipes & slides
+                blur_strength = in_blur_window(idx)
+                if blur_strength > 0.05:
+                    smeared = F.conv2d(chw, motion_kernel, padding=(0, k_len // 2), groups=3)
+                    chw = chw * (1.0 - blur_strength * 0.65) + smeared * (blur_strength * 0.65)
 
-                w1 = torch.sin(px * 1.45 + t * 0.35 + torch.cos(py * 1.25 - t * 0.25))
-                w2 = torch.cos(py * 1.55 - t * 0.30 + torch.sin(px * 1.20 + t * 0.22))
-                wash1 = torch.clamp(
-                    (w1 * 0.5 + 0.5)
-                    * torch.exp(-((px + 0.55 - 0.16 * math.sin(t * 0.22)) ** 2 * 0.42 + (py + 0.35) ** 2 * 0.72)),
-                    0.0,
-                    1.0,
-                ).unsqueeze(0)
-                wash2 = torch.clamp(
-                    (w2 * 0.5 + 0.5)
-                    * torch.exp(-((px - 0.58 + 0.15 * math.cos(t * 0.20)) ** 2 * 0.42 + (py - 0.35) ** 2 * 0.72)),
-                    0.0,
-                    1.0,
-                ).unsqueeze(0)
-
-                # Soft watercolor blend onto warm alabaster silk canvas
-                bg = base_canvas * (1.0 - wash1 * 0.28) + c1 * (wash1 * 0.28)
-                bg = bg * (1.0 - wash2 * 0.26) + c2 * (wash2 * 0.26)
-                bg = bg + paper_grain
-
-                # Subtle warm soft-focus sunlit glow halo on CUDA GPU
-                small_bg = F.interpolate(bg.unsqueeze(0), scale_factor=0.25, mode="bilinear", align_corners=False)
-                soft_glow = F.conv2d(small_bg, k_h, padding=(0, k_size // 2), groups=3)
-                soft_glow = F.conv2d(soft_glow, k_v, padding=(k_size // 2, 0), groups=3)
-                soft_glow = F.interpolate(soft_glow, size=(H, W), mode="bilinear", align_corners=False).squeeze(0)
-                bg = bg * 0.88 + soft_glow * 0.12
-
-                # Crisp editorial alpha composite + gentle daylight edge framing
-                comp = (bg * (1.0 - fg_a) + fg_rgb * fg_a) * vignette
-                comp = torch.clamp(comp, 0.0, 1.0)
-                out_u8 = (comp.permute(1, 2, 0) * 255.0).to(torch.uint8).cpu().numpy()
+                out_u8 = (torch.clamp(chw.squeeze(0), 0.0, 1.0).permute(1, 2, 0) * 255.0).to(torch.uint8).cpu().numpy()
                 proc.stdin.write(out_u8.tobytes())
 
                 if (idx + 1) % 240 == 0 or (idx + 1) == total:
                     dt = time.time() - t_start
                     fps_now = (idx + 1) / max(0.01, dt)
-                    print(f"[CUDA GPU + NVENC] Composited & encoded {idx + 1}/{total} frames ({fps_now:.1f} fps)")
+                    print(f"[CUDA GPU + NVENC] Processed & encoded {idx + 1}/{total} frames ({fps_now:.1f} fps)")
     finally:
         proc.stdin.close()
         rc = proc.wait()
@@ -415,9 +352,9 @@ def verify_final_mp4(mp4_path: Path, ffmpeg_bin: str, ffprobe_bin: str | None) -
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Zero-Blink NVIDIA GPU Employetics 40s Commercial Renderer")
-    parser.add_argument("--output", default=str(OUT_DIR / "employetics-ad-1080p60.mp4"))
-    parser.add_argument("--captions", action="store_true", help="Burn synchronized captions into the video")
+    parser = argparse.ArgumentParser(description="Zero-Blink NVIDIA GPU Kinetic Typography Renderer")
+    parser.add_argument("--output", default=str(OUT_DIR / "employetics-kinetic-ad-1080p60.mp4"))
+    parser.add_argument("--captions", action="store_true", help="Burn optional captions into the video")
     parser.add_argument("--scale", type=float, default=1.0, help="Resolution scale (1.0=1080p, 2.0=4K)")
     parser.add_argument("--crf", type=int, default=16, help="Quality CRF/CQ (lower = sharper, default 16)")
     parser.add_argument("--concurrency", type=int, default=0, help="Remotion worker count (0 = auto)")
@@ -438,26 +375,19 @@ def main() -> None:
     nvenc_ok = bool(gpu_name and has_nvenc(ffmpeg_bin))
 
     print("=" * 72)
-    print("  EMPLOYETICS 40s MOTION GRAPHICS — ZERO-BLINK NVIDIA GPU PIPELINE")
+    print("  EMPLOYETICS 40s KINETIC TRAILER — ZERO-BLINK NVIDIA GPU PIPELINE")
     print("=" * 72)
     print(f"  NVIDIA GPU       : {gpu_name or 'None (CPU mode)'}")
-    print(f"  CUDA Shader/Bloom: {'ACTIVE (PyTorch CUDA GPU)' if cuda_ok else 'CPU Fallback'}")
+    print(f"  CUDA Motion Blur : {'ACTIVE (PyTorch CUDA GPU)' if cuda_ok else 'CPU Fallback'}")
     print(f"  Hardware Encoder : {'ACTIVE (NVIDIA h264_nvenc)' if nvenc_ok else 'libx264 (CPU)'}")
     print(f"  Audio Master     : {audio_wav.name} (explicitly muxed AAC 256kbps)")
-    print(f"  Captions         : {'Burned-in ON' if args.captions else 'Clean (OFF, .srt generated)'}")
     print(f"  Resolution       : {int(1920 * args.scale)}x{int(1080 * args.scale)} @ 60fps")
     print("=" * 72)
-
-    # When CUDA GPU is available, render crisp transparent RGBA PNG UI layers and composite
-    # the liquid aurora shader + physical optical bloom + NVENC directly on the NVIDIA GPU!
-    use_gpu_compositor = cuda_ok
-    img_fmt = "png" if use_gpu_compositor else "jpeg"
 
     props = {
         "showCaptions": bool(args.captions),
         "includeAudio": False,
         "audioVolume": 1.0,
-        "transparentBg": use_gpu_compositor,
     }
     props_file = OUT_DIR / ".render_props.json"
     props_file.write_text(json.dumps(props), encoding="utf-8")
@@ -476,15 +406,14 @@ def main() -> None:
         "EmployeticsAd",
         str(frames_dir),
         "--sequence",
-        f"--image-format={img_fmt}",
+        "--image-format=jpeg",
+        "--jpeg-quality=96",
         "--muted",
         f"--props={props_file}",
         f"--scale={args.scale}",
         "--gl=swangle",
         "--overwrite",
     ]
-    if img_fmt == "jpeg":
-        remotion_cmd.append("--jpeg-quality=96")
     if args.frames:
         remotion_cmd.append(f"--frames={args.frames}")
     if args.concurrency > 0:
@@ -495,15 +424,16 @@ def main() -> None:
     monitor.start()
 
     try:
-        print(f"\n[Step 1/2] Rendering zero-blink deterministic UI frames ({img_fmt.upper()})...")
+        print("\n[Step 1/2] Rendering crisp zero-blink kinetic typography frames (60fps)...")
         res = subprocess.run(remotion_cmd, cwd=ROOT_DIR)
         if res.returncode != 0:
             sys.exit(res.returncode)
 
-        if use_gpu_compositor:
-            frame_files = sorted_frame_files(frames_dir, "png")
-            print(f"\n[Step 2/2] Running NVIDIA CUDA Shader + Optical Bloom + {'h264_nvenc' if nvenc_ok else 'libx264'} + Audio Mux...")
-            cuda_composite_and_nvenc(
+        frame_files = sorted_frame_files(frames_dir, "jpeg")
+
+        if cuda_ok:
+            print(f"\n[Step 2/2] Running PyTorch CUDA Kinetic Motion-Blur + {'NVIDIA h264_nvenc' if nvenc_ok else 'libx264'} + Audio Mux...")
+            cuda_postprocess_and_nvenc(
                 frame_files=frame_files,
                 audio_wav=audio_wav,
                 output_path=output_path,
@@ -512,7 +442,6 @@ def main() -> None:
                 crf=args.crf,
             )
         else:
-            frame_files = sorted_frame_files(frames_dir, "jpeg")
             sample = frame_files[0].name
             m = re.match(r"^(.*?)(\d+)(\.[a-zA-Z]+)$", sample)
             assert m is not None

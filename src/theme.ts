@@ -1,32 +1,26 @@
-import { loadFont as loadFraunces } from "@remotion/google-fonts/Fraunces";
-import { loadFont as loadDMSans } from "@remotion/google-fonts/DMSans";
-import { loadFont as loadDMMono } from "@remotion/google-fonts/DMMono";
+import { loadFont as loadMontserrat } from "@remotion/google-fonts/Montserrat";
+import { loadFont as loadInter } from "@remotion/google-fonts/Inter";
+import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";
 
-const fraunces = loadFraunces("normal", {
-  weights: ["500", "600", "700", "800"],
+const montserrat = loadMontserrat("normal", {
+  weights: ["700", "800", "900"],
   subsets: ["latin"],
 });
 
-const frauncesItalic = loadFraunces("italic", {
-  weights: ["500", "600", "700"],
+const inter = loadInter("normal", {
+  weights: ["600", "700", "800"],
   subsets: ["latin"],
 });
 
-const dmSans = loadDMSans("normal", {
-  weights: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-});
-
-const dmMono = loadDMMono("normal", {
-  weights: ["400", "500"],
+const mono = loadJetBrainsMono("normal", {
+  weights: ["500", "700"],
   subsets: ["latin"],
 });
 
 export const FONTS = {
-  serif: `${fraunces.fontFamily}, "Fraunces", Georgia, serif`,
-  serifItalic: `${frauncesItalic.fontFamily}, "Fraunces", Georgia, serif`,
-  sans: `${dmSans.fontFamily}, "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`,
-  mono: `${dmMono.fontFamily}, "DM Mono", ui-monospace, monospace`,
+  heavy: `${montserrat.fontFamily}, "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif`,
+  sans: `${inter.fontFamily}, "Inter", -apple-system, BlinkMacSystemFont, sans-serif`,
+  mono: `${mono.fontFamily}, "JetBrains Mono", ui-monospace, monospace`,
 } as const;
 
 export const VIDEO_CONFIG = {
@@ -38,40 +32,51 @@ export const VIDEO_CONFIG = {
 } as const;
 
 export const SCENES = {
-  scene1: { id: "scene1", startSec: 0, endSec: 9, startFrame: 0, durationFrames: 540 },
-  scene2: { id: "scene2", startSec: 9, endSec: 20, startFrame: 540, durationFrames: 660 },
-  scene3: { id: "scene3", startSec: 20, endSec: 31, startFrame: 1200, durationFrames: 660 },
-  scene4: { id: "scene4", startSec: 31, endSec: 35, startFrame: 1860, durationFrames: 240 },
-  scene5: { id: "scene5", startSec: 35, endSec: 40, startFrame: 2100, durationFrames: 300 },
+  scene1Hook: { id: "scene1", startSec: 0, endSec: 3, startFrame: 0, durationFrames: 180 },
+  scene2Problem: { id: "scene2", startSec: 3, endSec: 11, startFrame: 180, durationFrames: 480 },
+  scene3Reveal: { id: "scene3", startSec: 11, endSec: 14, startFrame: 660, durationFrames: 180 },
+  scene4App: { id: "scene4", startSec: 14, endSec: 26, startFrame: 840, durationFrames: 720 },
+  scene5Solution: { id: "scene5", startSec: 26, endSec: 34, startFrame: 1560, durationFrames: 480 },
+  scene6Whiteout: { id: "scene6", startSec: 34, endSec: 40, startFrame: 2040, durationFrames: 360 },
 } as const;
 
-// Completely New Art Direction: Warm Sunlit Editorial Minimalism
+// Strict Bold Kinetic Typography Palette — NO NEON COLOURS
 export const COLORS = {
-  // Warm paper & alabaster canvas
-  canvasLight: "#FAF6F0",
-  canvasWarm: "#F3EBE0",
-  paperCard: "rgba(255, 253, 249, 0.94)",
-  paperSoft: "#F6EFE5",
-  borderHairline: "rgba(28, 25, 23, 0.10)",
-  borderStrong: "rgba(28, 25, 23, 0.18)",
+  black: "#000000",
+  navy: "#0F2A52",
+  navyDark: "#0A1D3A",
+  navyMid: "#173B70",
+  white: "#FFFFFF",
+  amber: "#F59E0B",
+  amberDeep: "#D97706",
 
-  // Rich Espresso & Stone ink typography
-  ink: "#1C1917",
-  inkSecondary: "#57534E",
-  inkMuted: "#78716C",
+  // Flat Battery Status Colors (clean flat vector, no neon)
+  batteryGreen: "#16A34A",
+  batteryAmber: "#F59E0B",
+  batteryRed: "#DC2626",
 
-  // Emotional Editorial Accents (NO dark neon!)
-  terracotta: "#D94826",
-  terracottaSoft: "#FDECE7",
-  amber: "#D97706",
-  amberSoft: "#FEF3C7",
-
-  forest: "#14532D",
-  sage: "#15803D",
-  sageBright: "#16A34A",
-  sageSoft: "#E6F4EC",
-  sageMist: "#BBF7D0",
-
-  gold: "#B45309",
-  goldLight: "#F59E0B",
+  // Subtle neutral for flat laptop body bezel
+  slateFrame: "#1E293B",
+  slateBase: "#CBD5E1",
+  slateBaseDark: "#94A3B8",
 } as const;
+
+/**
+ * Deterministic damped trailer impact screen-shake (zero randomness, zero flicker).
+ */
+export function getImpactShake(
+  frame: number,
+  hitFrame: number,
+  amplitude = 14,
+  duration = 18
+): { x: number; y: number; rot: number } {
+  const dt = frame - hitFrame;
+  if (dt < 0 || dt > duration) {
+    return { x: 0, y: 0, rot: 0 };
+  }
+  const decay = Math.exp(-dt * 0.24) * (1 - dt / duration);
+  const x = Math.sin(dt * 2.9) * amplitude * decay;
+  const y = Math.cos(dt * 3.7) * amplitude * 0.8 * decay;
+  const rot = Math.sin(dt * 2.2) * (amplitude * 0.04) * decay;
+  return { x, y, rot };
+}

@@ -1,38 +1,26 @@
 {
-  "voice": "edge:en-US-AndrewMultilingualNeural",
+  "voice": "edge:en-US-BrianMultilingualNeural",
   "durationSec": 40,
   "masterAudioFile": "audio/master_audio.wav",
   "hasGeneratedAudio": false,
   "segments": [
     {
-      "sceneId": "scene1",
+      "sceneId": "vo1",
       "startSec": 0.25,
-      "endSec": 8.6,
-      "text": "Four weekends in a row. Logging in later every week. And nobody asks if you’re okay."
+      "endSec": 2.75,
+      "text": "Your best employee just quit."
     },
     {
-      "sceneId": "scene2",
-      "startSec": 9.3,
-      "endSec": 19.3,
-      "text": "Employetics shows you your own burnout risk, and spots patterns you might miss."
+      "sceneId": "vo2",
+      "startSec": 8.2,
+      "endSec": 10.4,
+      "text": "Nobody saw it coming."
     },
     {
-      "sceneId": "scene3",
-      "startSec": 20.3,
-      "endSec": 30.4,
-      "text": "Take a one-minute check-in. It’s private. Never shared with HR."
-    },
-    {
-      "sceneId": "scene4",
-      "startSec": 31.25,
-      "endSec": 34.6,
-      "text": "Know when to slow down."
-    },
-    {
-      "sceneId": "scene5",
-      "startSec": 35.25,
-      "endSec": 39.3,
-      "text": "Employetics. Predict burnout. Keep your people."
+      "sceneId": "vo3",
+      "startSec": 11.45,
+      "endSec": 13.3,
+      "text": "Now you can."
     }
   ]
 }

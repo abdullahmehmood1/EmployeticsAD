@@ -29,33 +29,21 @@ export interface AudioManifest {
 
 export const AD_SCRIPT: SceneScript[] = [
   {
-    id: "scene1",
-    startSec: 0,
-    endSec: 9,
-    text: "Four weekends in a row. Logging in later every week. And nobody asks if you’re okay.",
+    id: "vo1",
+    startSec: 0.25,
+    endSec: 2.9,
+    text: "Your best employee just quit.",
   },
   {
-    id: "scene2",
-    startSec: 9,
-    endSec: 20,
-    text: "Employetics shows you your own burnout risk, and spots patterns you might miss.",
+    id: "vo2",
+    startSec: 8.2,
+    endSec: 10.7,
+    text: "Nobody saw it coming.",
   },
   {
-    id: "scene3",
-    startSec: 20,
-    endSec: 31,
-    text: "Take a one-minute check-in. It’s private. Never shared with HR.",
-  },
-  {
-    id: "scene4",
-    startSec: 31,
-    endSec: 35,
-    text: "Know when to slow down.",
-  },
-  {
-    id: "scene5",
-    startSec: 35,
-    endSec: 40,
-    text: "Employetics. Predict burnout. Keep your people.",
+    id: "vo3",
+    startSec: 11.4,
+    endSec: 13.8,
+    text: "Now you can.",
   },
 ];

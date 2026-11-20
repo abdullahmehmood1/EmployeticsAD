@@ -46,53 +46,53 @@ SCENES = [
         "id": "scene1",
         "startSec": 0.0,
         "endSec": 9.0,
-        "leadIn": 0.20,
+        "leadIn": 0.25,
         "tailPad": 0.20,
         "displayText": (
-            "One teammate is drowning in tasks. Another has hours to spare. "
-            "You only notice when someone burns out."
+            "Four weekends in a row. Logging in later every week. "
+            "And nobody asks if you’re okay."
         ),
         "ttsText": (
-            "One teammate is drowning in tasks. Another has hours to spare. "
-            "You only notice when someone burns out."
+            "Four weekends in a row. Logging in later every week. "
+            "And nobody asks if you're okay."
         ),
     },
     {
         "id": "scene2",
         "startSec": 9.0,
-        "endSec": 19.0,
+        "endSec": 20.0,
         "leadIn": 0.30,
         "tailPad": 0.30,
         "displayText": (
-            "Employetics watches your team every day, and flags who is heading for burnout."
+            "Employetics shows you your own burnout risk, "
+            "and spots patterns you might miss."
         ),
         "ttsText": (
-            "Employetics watches your team every day — and flags who is heading for burnout."
+            "Employetics shows you your own burnout risk — "
+            "and spots patterns you might miss."
         ),
     },
     {
         "id": "scene3",
-        "startSec": 19.0,
+        "startSec": 20.0,
         "endSec": 31.0,
-        "leadIn": 0.25,
-        "tailPad": 0.25,
+        "leadIn": 0.30,
+        "tailPad": 0.30,
         "displayText": (
-            "One click gives a fairer split. In this demo, the most overloaded teammate "
-            "drops from 115 percent to 88 percent capacity."
+            "Take a one-minute check-in. It’s private. Never shared with HR."
         ),
         "ttsText": (
-            "One click gives a fairer split. In this demo, the most overloaded teammate "
-            "drops from 115 percent to 88 percent capacity."
+            "Take a one-minute check-in. It's private. Never shared with HR."
         ),
     },
     {
         "id": "scene4",
         "startSec": 31.0,
         "endSec": 35.0,
-        "leadIn": 0.20,
-        "tailPad": 0.20,
-        "displayText": "A balanced team. Before burnout, not after.",
-        "ttsText": "A balanced team. Before burnout, not after.",
+        "leadIn": 0.25,
+        "tailPad": 0.25,
+        "displayText": "Know when to slow down.",
+        "ttsText": "Know when to slow down.",
     },
     {
         "id": "scene5",
@@ -522,60 +522,63 @@ def generate_music_and_sfx(sr: int) -> np.ndarray:
     bed = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
 
     chords = [
-        # Scene 1 (0-9s): Moody workload imbalance tension
-        (0.0, 4.8, [45, 57, 60, 64, 71], 680.0, 0.22),
-        (4.3, 5.1, [45, 53, 60, 64, 69], 780.0, 0.23),
-        # Scene 2 (9-19s): Clean daily monitoring SaaS pulse
-        (8.9, 5.2, [53, 60, 64, 69], 1020.0, 0.24),
-        (13.8, 5.5, [55, 62, 64, 67], 1080.0, 0.24),
-        # Scene 3 (19-31s): One-click rebalance & uplifting resolution
-        (18.9, 6.2, [50, 57, 60, 64], 1080.0, 0.24),
-        (24.7, 6.5, [48, 55, 60, 64, 71], 1220.0, 0.25),
-        # Scene 4 (31-35s): Balanced team harmony
-        (30.9, 4.3, [53, 60, 64, 67, 74], 1280.0, 0.26),
-        # Scene 5 (35-40s): Clean warm brand resolve
-        (34.9, 5.1, [48, 55, 60, 64, 67], 1350.0, 0.28),
+        # Scene 1 (0-9s): Intimate warm reflective minor (Dm9 -> Bbmaj7)
+        (0.0, 4.8, [50, 57, 60, 64, 69], 640.0, 0.21),
+        (4.3, 5.1, [46, 53, 57, 62, 65], 700.0, 0.22),
+        # Scene 2 (9-20s): Warm sunlit clarity (Fmaj7 -> Cmaj9)
+        (8.9, 5.8, [53, 60, 64, 69], 960.0, 0.23),
+        (14.3, 6.0, [48, 55, 60, 64, 71], 1020.0, 0.23),
+        # Scene 3 (20-31s): Safe private sanctuary (Bbmaj7 -> Am7 -> Fmaj7)
+        (19.9, 5.8, [46, 53, 57, 62], 980.0, 0.23),
+        (25.3, 6.0, [53, 60, 64, 69, 72], 1100.0, 0.24),
+        # Scene 4 (31-35s): Calm breathing release (Gm9 -> C9sus4)
+        (30.9, 4.3, [55, 62, 65, 69, 74], 1180.0, 0.25),
+        # Scene 5 (35-40s): Warm sunlit Fmaj9 brand resolution
+        (34.9, 5.1, [53, 60, 64, 67, 69, 72], 1280.0, 0.27),
     ]
     for start, dur, notes, cutoff, gain in chords:
         pad = synthesize_warm_pad(notes, dur, sr, cutoff_hz=cutoff)
         add_stereo(bed, pad, start, gain=gain)
 
-    # Gentle deep rhythmic pulse (9.0s -> 35.0s at 112 BPM — stays below 160Hz, never clashes with voice!)
-    beat_sec = 60.0 / 112.0
+    # Soft, intimate organic pulse (slower, calmer 92 BPM human breathing tempo)
+    beat_sec = 60.0 / 92.0
     t_cursor = 9.0
     while t_cursor < 34.8:
-        n_k = int(0.18 * sr)
+        n_k = int(0.20 * sr)
         tk = np.arange(n_k) / sr
-        kf = 92.0 * np.exp(-tk * 24.0) + 46.0
-        pulse = np.sin(2 * np.pi * np.cumsum(kf) / sr) * np.minimum(1.0, tk / 0.008) * np.exp(-tk * 13.0)
-        add_stereo(bed, pulse, t_cursor, gain=0.13)
+        kf = 78.0 * np.exp(-tk * 22.0) + 44.0
+        pulse = np.sin(2 * np.pi * np.cumsum(kf) / sr) * np.minimum(1.0, tk / 0.012) * np.exp(-tk * 12.0)
+        add_stereo(bed, pulse, t_cursor, gain=0.10)
         t_cursor += beat_sec
 
-    # Tasteful UI sound effects synced exactly to the new 5-scene beats
+    # Delicate warm acoustic/editorial SFX synced to the new 5 scenes
     sfx = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
-    # Scene 1 (0-9s): Overload card, Spare card, Burnout threshold hit
-    add_stereo(sfx, make_soft_bell(587.33, 0.40, sr, pan=-0.3), 0.25, gain=0.10)
-    add_stereo(sfx, make_soft_bell(659.25, 0.45, sr, pan=0.3), 2.80, gain=0.10)
-    add_stereo(sfx, make_warm_sub(0.85, sr), 5.70, gain=0.17)
-    add_stereo(sfx, make_air_whoosh(0.80, 240.0, 1500.0, sr), 8.55, gain=0.12)
-    # Scene 2 (9-19s): Daily radar reveal + Burnout flag at 13.8s
-    add_stereo(sfx, make_soft_bell(523.25, 0.65, sr, pan=-0.2), 9.15, gain=0.09)
-    add_stereo(sfx, make_soft_bell(783.99, 0.75, sr, pan=0.2), 9.30, gain=0.09)
-    add_stereo(sfx, make_soft_bell(880.0, 0.50, sr, pan=0.0), 13.80, gain=0.11)
-    add_stereo(sfx, make_air_whoosh(0.60, 280.0, 1400.0, sr), 18.65, gain=0.11)
-    # Scene 3 (19-31s): One-click rebalance button click at 20.8s + flying task arcs + 88% arrival
-    add_stereo(sfx, make_soft_bell(987.77, 0.35, sr, pan=0.25), 20.80, gain=0.13)
-    add_stereo(sfx, make_air_whoosh(0.75, 320.0, 1600.0, sr), 21.15, gain=0.10)
-    add_stereo(sfx, make_air_whoosh(0.70, 360.0, 1700.0, sr), 21.65, gain=0.09)
-    add_stereo(sfx, make_soft_bell(659.25, 0.60, sr, pan=-0.2), 25.30, gain=0.11)
-    add_stereo(sfx, make_soft_bell(1046.50, 0.85, sr, pan=0.2), 25.44, gain=0.12)
-    # Scene 4 (31-35s): Balanced team harmony shimmer
-    add_stereo(sfx, make_air_whoosh(0.80, 260.0, 1500.0, sr), 30.75, gain=0.10)
-    add_stereo(sfx, make_soft_bell(783.99, 0.80, sr, pan=0.0), 31.25, gain=0.10)
-    # Scene 5 (35-40s): Clean Employetics brand sting
-    add_stereo(sfx, make_warm_sub(1.3, sr), 35.10, gain=0.16)
-    add_stereo(sfx, make_soft_bell(523.25, 1.3, sr, pan=-0.25), 35.12, gain=0.11)
-    add_stereo(sfx, make_soft_bell(783.99, 1.6, sr, pan=0.25), 35.26, gain=0.11)
+    # Scene 1 (0-9s): 4 soft weekend card taps + midnight sweep + quiet heart beat
+    for i, t_card in enumerate([0.22, 0.62, 1.02, 1.42]):
+        add_stereo(sfx, make_soft_bell(440.0 + i * 35.0, 0.28, sr, pan=(i - 1.5) * 0.2), t_card, gain=0.075)
+    add_stereo(sfx, make_air_whoosh(0.70, 220.0, 950.0, sr), 3.05, gain=0.09)
+    add_stereo(sfx, make_warm_sub(0.90, sr), 6.00, gain=0.14)
+    # Scene 2 (9-20s): Warm personal dial reveal + 3 quiet pattern insight chimes
+    add_stereo(sfx, make_air_whoosh(0.75, 240.0, 1250.0, sr), 8.65, gain=0.10)
+    add_stereo(sfx, make_soft_bell(523.25, 0.70, sr, pan=-0.2), 9.20, gain=0.085)
+    add_stereo(sfx, make_soft_bell(659.25, 0.75, sr, pan=0.2), 9.38, gain=0.085)
+    add_stereo(sfx, make_soft_bell(587.33, 0.35, sr, pan=0.25), 13.25, gain=0.075)
+    add_stereo(sfx, make_soft_bell(659.25, 0.35, sr, pan=0.25), 14.75, gain=0.075)
+    add_stereo(sfx, make_soft_bell(783.99, 0.40, sr, pan=0.25), 16.20, gain=0.075)
+    # Scene 3 (20-31s): Check-in card + 2 soft chip taps + Private Vault Lock chime at 25.0s
+    add_stereo(sfx, make_air_whoosh(0.65, 250.0, 1200.0, sr), 19.70, gain=0.09)
+    add_stereo(sfx, make_soft_bell(698.46, 0.25, sr, pan=-0.15), 22.25, gain=0.07)
+    add_stereo(sfx, make_soft_bell(783.99, 0.25, sr, pan=0.15), 23.08, gain=0.07)
+    add_stereo(sfx, make_soft_bell(523.25, 0.75, sr, pan=-0.2), 25.02, gain=0.11)
+    add_stereo(sfx, make_soft_bell(880.00, 0.90, sr, pan=0.2), 25.14, gain=0.11)
+    # Scene 4 (31-35s): Serene breathing swell
+    add_stereo(sfx, make_air_whoosh(1.10, 180.0, 900.0, sr), 30.85, gain=0.09)
+    add_stereo(sfx, make_soft_bell(698.46, 1.10, sr, pan=0.0), 31.30, gain=0.09)
+    # Scene 5 (35-40s): Warm Employetics brand resolution chord
+    add_stereo(sfx, make_warm_sub(1.3, sr), 35.10, gain=0.14)
+    add_stereo(sfx, make_soft_bell(523.25, 1.4, sr, pan=-0.25), 35.12, gain=0.10)
+    add_stereo(sfx, make_soft_bell(659.25, 1.6, sr, pan=0.0), 35.24, gain=0.10)
+    add_stereo(sfx, make_soft_bell(783.99, 1.8, sr, pan=0.25), 35.36, gain=0.10)
 
     combined = apply_subtle_stereo_reverb(bed + sfx, sr, wet=0.26)
     fade_n = int(1.3 * sr)

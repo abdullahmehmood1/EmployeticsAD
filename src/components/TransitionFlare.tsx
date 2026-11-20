@@ -2,10 +2,10 @@ import React from "react";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { COLORS, SCENES, VIDEO_CONFIG } from "../theme";
 
-// Exact scene transition points (9s, 19s, 31s, 35s)
+// Exact scene transition points (9s, 20s, 31s, 35s)
 const CUT_FRAMES = [
   SCENES.scene2.startFrame, // 540 (9s)
-  SCENES.scene3.startFrame, // 1140 (19s)
+  SCENES.scene3.startFrame, // 1200 (20s)
   SCENES.scene4.startFrame, // 1860 (31s)
   SCENES.scene5.startFrame, // 2100 (35s)
 ];
@@ -13,30 +13,24 @@ const CUT_FRAMES = [
 export const TransitionFlare: React.FC = () => {
   const frame = useCurrentFrame();
 
-  let flareStrength = 0;
-  let sweepProgress = 0;
-  let flareColor: string = COLORS.cyanBright;
+  let washStrength = 0;
+  let sweepX = 0;
+  let accentColor: string = COLORS.sage;
 
   for (let i = 0; i < CUT_FRAMES.length; i++) {
-    const cut = CUT_FRAMES[i];
-    const dist = frame - cut;
-    if (dist >= -18 && dist <= 18) {
-      flareStrength = interpolate(Math.abs(dist), [0, 18], [1, 0], {
+    const dist = frame - CUT_FRAMES[i];
+    if (dist >= -16 && dist <= 16) {
+      washStrength = interpolate(Math.abs(dist), [0, 16], [1, 0], {
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
         easing: Easing.out(Easing.cubic),
       });
-      sweepProgress = interpolate(dist, [-18, 18], [-20, 120], {
+      sweepX = interpolate(dist, [-16, 16], [-18, 118], {
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
         easing: Easing.inOut(Easing.cubic),
       });
-      flareColor =
-        i === 0
-          ? COLORS.indigoBright
-          : i === 2
-          ? COLORS.emeraldBright
-          : COLORS.cyanBright;
+      accentColor = i === 0 ? COLORS.amber : COLORS.sage;
       break;
     }
   }
@@ -45,52 +39,38 @@ export const TransitionFlare: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
-      {flareStrength > 0.01 && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              bottom: 0,
-              left: `${sweepProgress}%`,
-              width: 320,
-              transform: "translateX(-50%) skewX(-12deg)",
-              background: `linear-gradient(90deg, transparent 0%, ${flareColor}28 42%, rgba(255,255,255,0.42) 50%, ${flareColor}28 58%, transparent 100%)`,
-              opacity: flareStrength * 0.8,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: "50%",
-              height: 4,
-              transform: "translateY(-50%)",
-              background: `linear-gradient(90deg, transparent 0%, ${flareColor} 50%, transparent 100%)`,
-              opacity: flareStrength * 0.55,
-            }}
-          />
-        </>
+      {/* Soft warm sunlit silk wipe between chapters */}
+      {washStrength > 0.01 && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: `${sweepX}%`,
+            width: 360,
+            transform: "translateX(-50%) skewX(-10deg)",
+            background: `linear-gradient(90deg, transparent 0%, rgba(250, 246, 240, 0.78) 46%, ${accentColor}30 52%, transparent 100%)`,
+            opacity: washStrength,
+          }}
+        />
       )}
 
-      {/* Cinema timeline progress hairline */}
+      {/* Warm Terracotta -> Sage editorial progress thread */}
       <div
         style={{
           position: "absolute",
           left: 0,
           right: 0,
           bottom: 0,
-          height: 3,
-          background: "rgba(148, 163, 184, 0.12)",
+          height: 4,
+          background: "rgba(28, 25, 23, 0.08)",
         }}
       >
         <div
           style={{
             width: `${progressPct}%`,
             height: "100%",
-            background: "linear-gradient(90deg, #6366F1 0%, #22D3EE 60%, #34D399 100%)",
-            boxShadow: "0 0 12px rgba(34, 211, 238, 0.65)",
+            background: "linear-gradient(90deg, #D94826 0%, #D97706 45%, #15803D 100%)",
           }}
         />
       </div>

@@ -17,17 +17,11 @@ export const CaptionsOverlay: React.FC<CaptionsOverlayProps> = ({ manifest, enab
   }
 
   const currentSec = frame / fps;
-
-  // Find active segment
   const segment = manifest.segments.find(
     (s) => currentSec >= s.startSec - 0.05 && currentSec <= s.endSec + 0.15
   );
+  if (!segment) return null;
 
-  if (!segment) {
-    return null;
-  }
-
-  // If word-level timings exist, group into clean 6-8 word broadcast chunks
   let displayWords: { text: string; active: boolean; spoken: boolean }[] = [];
 
   if (segment.words && segment.words.length > 0) {
@@ -36,7 +30,6 @@ export const CaptionsOverlay: React.FC<CaptionsOverlayProps> = ({ manifest, enab
       (w) => currentSec >= w.startSec - 0.05 && currentSec <= w.endSec + 0.12
     );
     if (activeIdx === -1) {
-      // Find last word started before currentSec
       for (let i = segment.words.length - 1; i >= 0; i--) {
         if (currentSec >= segment.words[i].startSec) {
           activeIdx = i;
@@ -48,16 +41,12 @@ export const CaptionsOverlay: React.FC<CaptionsOverlayProps> = ({ manifest, enab
 
     const chunkStart = Math.floor(activeIdx / chunkSize) * chunkSize;
     const chunk = segment.words.slice(chunkStart, chunkStart + chunkSize);
-    displayWords = chunk.map((w, idx) => {
-      const globalIdx = chunkStart + idx;
-      return {
-        text: w.word,
-        active: globalIdx === activeIdx,
-        spoken: globalIdx <= activeIdx,
-      };
-    });
+    displayWords = chunk.map((w, idx) => ({
+      text: w.word,
+      active: chunkStart + idx === activeIdx,
+      spoken: chunkStart + idx <= activeIdx,
+    }));
   } else {
-    // Fallback chunking by proportional time
     const allWords = segment.text.split(" ");
     const progress = Math.min(
       0.999,
@@ -85,19 +74,17 @@ export const CaptionsOverlay: React.FC<CaptionsOverlayProps> = ({ manifest, enab
       style={{
         justifyContent: "flex-end",
         alignItems: "center",
-        paddingBottom: 42,
+        paddingBottom: 40,
         pointerEvents: "none",
       }}
     >
       <div
         style={{
           opacity: fade,
-          background: "rgba(5, 8, 20, 0.78)",
-          border: "1px solid rgba(148, 163, 184, 0.22)",
-          boxShadow: "0 12px 36px rgba(0, 0, 0, 0.55)",
-          borderRadius: 16,
-          padding: "14px 28px",
-          maxWidth: 1120,
+          background: "rgba(28, 25, 23, 0.90)",
+          borderRadius: 999,
+          padding: "13px 30px",
+          boxShadow: "0 12px 32px rgba(28, 25, 23, 0.22)",
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "center",
@@ -108,16 +95,14 @@ export const CaptionsOverlay: React.FC<CaptionsOverlayProps> = ({ manifest, enab
           <span
             key={`${w.text}-${idx}`}
             style={{
-              fontFamily: FONTS.body,
-              fontSize: 30,
+              fontFamily: FONTS.sans,
+              fontSize: 28,
               fontWeight: w.active ? 700 : 500,
               color: w.active
-                ? COLORS.cyanBright
+                ? "#FDE68A"
                 : w.spoken
-                ? COLORS.textPrimary
-                : "rgba(248, 250, 252, 0.55)",
-              letterSpacing: "-0.01em",
-              textShadow: w.active ? "0 0 18px rgba(34, 211, 238, 0.45)" : "none",
+                ? "#FAF6F0"
+                : "rgba(250, 246, 240, 0.58)",
             }}
           >
             {w.text}

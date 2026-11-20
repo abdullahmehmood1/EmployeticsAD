@@ -1,26 +1,32 @@
-import { loadFont as loadPlusJakarta } from "@remotion/google-fonts/PlusJakartaSans";
-import { loadFont as loadInter } from "@remotion/google-fonts/Inter";
-import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";
+import { loadFont as loadFraunces } from "@remotion/google-fonts/Fraunces";
+import { loadFont as loadDMSans } from "@remotion/google-fonts/DMSans";
+import { loadFont as loadDMMono } from "@remotion/google-fonts/DMMono";
 
-const plusJakarta = loadPlusJakarta("normal", {
+const fraunces = loadFraunces("normal", {
   weights: ["500", "600", "700", "800"],
   subsets: ["latin"],
 });
 
-const inter = loadInter("normal", {
+const frauncesItalic = loadFraunces("italic", {
+  weights: ["500", "600", "700"],
+  subsets: ["latin"],
+});
+
+const dmSans = loadDMSans("normal", {
   weights: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
-const jetBrainsMono = loadJetBrainsMono("normal", {
-  weights: ["400", "500", "600", "700"],
+const dmMono = loadDMMono("normal", {
+  weights: ["400", "500"],
   subsets: ["latin"],
 });
 
 export const FONTS = {
-  display: `${plusJakarta.fontFamily}, "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif`,
-  body: `${inter.fontFamily}, "Inter", -apple-system, BlinkMacSystemFont, sans-serif`,
-  mono: `${jetBrainsMono.fontFamily}, "JetBrains Mono", ui-monospace, monospace`,
+  serif: `${fraunces.fontFamily}, "Fraunces", Georgia, serif`,
+  serifItalic: `${frauncesItalic.fontFamily}, "Fraunces", Georgia, serif`,
+  sans: `${dmSans.fontFamily}, "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`,
+  mono: `${dmMono.fontFamily}, "DM Mono", ui-monospace, monospace`,
 } as const;
 
 export const VIDEO_CONFIG = {
@@ -33,35 +39,39 @@ export const VIDEO_CONFIG = {
 
 export const SCENES = {
   scene1: { id: "scene1", startSec: 0, endSec: 9, startFrame: 0, durationFrames: 540 },
-  scene2: { id: "scene2", startSec: 9, endSec: 19, startFrame: 540, durationFrames: 600 },
-  scene3: { id: "scene3", startSec: 19, endSec: 31, startFrame: 1140, durationFrames: 720 },
+  scene2: { id: "scene2", startSec: 9, endSec: 20, startFrame: 540, durationFrames: 660 },
+  scene3: { id: "scene3", startSec: 20, endSec: 31, startFrame: 1200, durationFrames: 660 },
   scene4: { id: "scene4", startSec: 31, endSec: 35, startFrame: 1860, durationFrames: 240 },
   scene5: { id: "scene5", startSec: 35, endSec: 40, startFrame: 2100, durationFrames: 300 },
 } as const;
 
+// Completely New Art Direction: Warm Sunlit Editorial Minimalism
 export const COLORS = {
-  bgDeep: "#050814",
-  bgSurface: "#0B1120",
-  bgCard: "rgba(15, 23, 42, 0.78)",
-  bgCardElevated: "rgba(22, 33, 58, 0.88)",
-  borderSubtle: "rgba(148, 163, 184, 0.16)",
-  borderGlow: "rgba(99, 102, 241, 0.45)",
+  // Warm paper & alabaster canvas
+  canvasLight: "#FAF6F0",
+  canvasWarm: "#F3EBE0",
+  paperCard: "rgba(255, 253, 249, 0.94)",
+  paperSoft: "#F6EFE5",
+  borderHairline: "rgba(28, 25, 23, 0.10)",
+  borderStrong: "rgba(28, 25, 23, 0.18)",
 
-  textPrimary: "#F8FAFC",
-  textSecondary: "#94A3B8",
-  textMuted: "#64748B",
+  // Rich Espresso & Stone ink typography
+  ink: "#1C1917",
+  inkSecondary: "#57534E",
+  inkMuted: "#78716C",
 
-  indigo: "#6366F1",
-  indigoBright: "#818CF8",
-  cyan: "#06B6D4",
-  cyanBright: "#22D3EE",
-  violet: "#8B5CF6",
+  // Emotional Editorial Accents (NO dark neon!)
+  terracotta: "#D94826",
+  terracottaSoft: "#FDECE7",
+  amber: "#D97706",
+  amberSoft: "#FEF3C7",
 
-  crimson: "#F43F5E",
-  crimsonGlow: "rgba(244, 63, 94, 0.35)",
-  amber: "#F59E0B",
-  amberGlow: "rgba(245, 158, 11, 0.30)",
-  emerald: "#10B981",
-  emeraldBright: "#34D399",
-  emeraldGlow: "rgba(16, 185, 129, 0.32)",
+  forest: "#14532D",
+  sage: "#15803D",
+  sageBright: "#16A34A",
+  sageSoft: "#E6F4EC",
+  sageMist: "#BBF7D0",
+
+  gold: "#B45309",
+  goldLight: "#F59E0B",
 } as const;

@@ -176,16 +176,15 @@ def sorted_frame_files(frames_dir: Path, ext: str) -> list[Path]:
 
 
 def interpolate_palette(frame_idx: int) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
-    """Smooth narrative RGB color mood across all 2,400 frames (5 chapters)."""
+    """Warm Sunlit Editorial Watercolor Palette (Terracotta Dusk -> Amber Clarity -> Botanical Sage -> Warm Gold)."""
     keyframes = [
-        (0, (0.95, 0.25, 0.37), (0.04, 0.71, 0.83)),     # Scene 1: Crimson Overload + Cyan Spare
-        (480, (0.92, 0.20, 0.34), (0.96, 0.62, 0.04)),   # Scene 1 end: Burnout peak
-        (600, (0.39, 0.40, 0.95), (0.04, 0.71, 0.83)),   # Scene 2: Employetics Daily Radar (Indigo/Cyan)
-        (1140, (0.31, 0.27, 0.90), (0.06, 0.72, 0.85)),  # Scene 3 start: Rebalance setup
-        (1520, (0.06, 0.73, 0.51), (0.13, 0.83, 0.93)),  # Scene 3 mid: 115% -> 88% Emerald drop
-        (1860, (0.06, 0.75, 0.52), (0.20, 0.83, 0.60)),  # Scene 4: Balanced Healthy Team
-        (2130, (0.39, 0.40, 0.95), (0.13, 0.83, 0.93)),  # Scene 5: Employetics Brand Finale
-        (2400, (0.39, 0.40, 0.95), (0.54, 0.36, 0.96)),  # End glow
+        (0, (0.96, 0.68, 0.52), (0.98, 0.84, 0.58)),     # Scene 1: Warm Apricot & Terracotta Dusk
+        (480, (0.94, 0.58, 0.45), (0.96, 0.78, 0.52)),   # Scene 1 end: Intimate warm ember
+        (600, (0.97, 0.82, 0.54), (0.68, 0.88, 0.74)),   # Scene 2: Sunlit Amber + Soft Eucalyptus
+        (1200, (0.62, 0.86, 0.71), (0.97, 0.86, 0.64)),  # Scene 3: Botanical Private Sanctuary
+        (1860, (0.58, 0.87, 0.70), (0.98, 0.90, 0.66)),  # Scene 4: Breathing Sage & Warm Sunlight
+        (2130, (0.97, 0.85, 0.60), (0.64, 0.86, 0.72)),  # Scene 5: Golden Editorial Brand Finale
+        (2400, (0.96, 0.84, 0.60), (0.68, 0.88, 0.74)),
     ]
     for i in range(len(keyframes) - 1):
         f0, a0, b0 = keyframes[i]
@@ -225,9 +224,9 @@ def cuda_composite_and_nvenc(
     first = load_rgba_png(frame_files[0])
     H, W = first.shape[0], first.shape[1]
 
-    print(f"[CUDA GPU] Initializing {W}x{H} Liquid Aurora + Optical Bloom Shader on {torch.cuda.get_device_name(0)}...")
+    print(f"[CUDA GPU] Initializing {W}x{H} Sunlit Editorial Watercolor + Optical Glow Shader on {torch.cuda.get_device_name(0)}...")
 
-    # Precompute normalized coordinate grid & vignette on GPU
+    # Precompute normalized coordinate grid & warm silk linen base on GPU
     ys = torch.linspace(-1.0, 1.0, H, device=device, dtype=torch.float32)
     xs = torch.linspace(-1.0, 1.0, W, device=device, dtype=torch.float32)
     gy, gx = torch.meshgrid(ys, xs, indexing="ij")
@@ -235,18 +234,23 @@ def cuda_composite_and_nvenc(
     px = gx * aspect
     py = gy
 
-    # Deep vertical base gradient + smooth radial vignette
+    # Warm Ivory / Alabaster silk canvas gradient (#FCF9F4 -> #EFE6D8)
     v_grad = (gy * 0.5 + 0.5).unsqueeze(0)  # (1, H, W)
-    base_top = torch.tensor([0.032, 0.052, 0.115], device=device).view(3, 1, 1)
-    base_bot = torch.tensor([0.012, 0.020, 0.048], device=device).view(3, 1, 1)
+    base_top = torch.tensor([0.988, 0.976, 0.956], device=device).view(3, 1, 1)
+    base_bot = torch.tensor([0.937, 0.902, 0.847], device=device).view(3, 1, 1)
     base_canvas = base_bot * v_grad + base_top * (1.0 - v_grad)
 
-    rad = torch.sqrt(px * px * 0.52 + py * py * 0.90)
-    vignette = torch.clamp(1.08 - rad * 0.46, 0.42, 1.0).unsqueeze(0)  # (1, H, W)
+    # Subtle tactile fine linen/paper warmth (static micro-texture, zero flicker!)
+    torch.manual_seed(42)
+    paper_grain = (torch.randn((1, H, W), device=device, dtype=torch.float32) * 0.008)
 
-    # 1D separable Gaussian kernel for fast physical GPU optical bloom on downsampled 1/4 res
+    # Very gentle editorial daylight edge framing
+    rad = torch.sqrt(px * px * 0.45 + py * py * 0.82)
+    vignette = torch.clamp(1.03 - rad * 0.09, 0.90, 1.0).unsqueeze(0)  # (1, H, W)
+
+    # 1D separable Gaussian kernel for soft sunlit halo depth on CUDA GPU
     k_size = 21
-    sigma = 5.5
+    sigma = 6.0
     coords = torch.arange(k_size, device=device, dtype=torch.float32) - (k_size - 1) / 2.0
     g1d = torch.exp(-(coords * coords) / (2.0 * sigma * sigma))
     g1d = g1d / g1d.sum()
@@ -320,31 +324,41 @@ def cuda_composite_and_nvenc(
                 fg_rgb = rgba[..., :3].permute(2, 0, 1)      # (3, H, W)
                 fg_a = rgba[..., 3:4].permute(2, 0, 1)       # (1, H, W)
 
-                # Continuous deterministic GPU liquid aurora shader (zero flicker!)
+                # Continuous deterministic GPU Sunlit Watercolor Caustics (zero flicker!)
                 t = idx / 60.0
                 c1_tup, c2_tup = interpolate_palette(idx)
                 c1 = torch.tensor(c1_tup, device=device, dtype=torch.float32).view(3, 1, 1)
                 c2 = torch.tensor(c2_tup, device=device, dtype=torch.float32).view(3, 1, 1)
 
-                w1 = torch.sin(px * 1.65 + t * 0.42 + torch.cos(py * 1.4 - t * 0.31))
-                w2 = torch.cos(py * 1.85 - t * 0.36 + torch.sin(px * 1.35 + t * 0.27))
-                aurora1 = torch.clamp((w1 * 0.5 + 0.5) * torch.exp(-((px + 0.42 - 0.18 * math.sin(t * 0.25)) ** 2 * 0.55 + (py + 0.25) ** 2 * 0.9)), 0.0, 1.0)
-                aurora2 = torch.clamp((w2 * 0.5 + 0.5) * torch.exp(-((px - 0.45 + 0.16 * math.cos(t * 0.22)) ** 2 * 0.55 + (py - 0.28) ** 2 * 0.9)), 0.0, 1.0)
+                w1 = torch.sin(px * 1.45 + t * 0.35 + torch.cos(py * 1.25 - t * 0.25))
+                w2 = torch.cos(py * 1.55 - t * 0.30 + torch.sin(px * 1.20 + t * 0.22))
+                wash1 = torch.clamp(
+                    (w1 * 0.5 + 0.5)
+                    * torch.exp(-((px + 0.55 - 0.16 * math.sin(t * 0.22)) ** 2 * 0.42 + (py + 0.35) ** 2 * 0.72)),
+                    0.0,
+                    1.0,
+                ).unsqueeze(0)
+                wash2 = torch.clamp(
+                    (w2 * 0.5 + 0.5)
+                    * torch.exp(-((px - 0.58 + 0.15 * math.cos(t * 0.20)) ** 2 * 0.42 + (py - 0.35) ** 2 * 0.72)),
+                    0.0,
+                    1.0,
+                ).unsqueeze(0)
 
-                bg = base_canvas + c1 * (aurora1.unsqueeze(0) * 0.34) + c2 * (aurora2.unsqueeze(0) * 0.28)
+                # Soft watercolor blend onto warm alabaster silk canvas
+                bg = base_canvas * (1.0 - wash1 * 0.28) + c1 * (wash1 * 0.28)
+                bg = bg * (1.0 - wash2 * 0.26) + c2 * (wash2 * 0.26)
+                bg = bg + paper_grain
 
-                # Real physical GPU optical bloom on bright UI elements (gauges, buttons, logo, flares)
-                bright = torch.clamp((fg_rgb * fg_a) - 0.52, min=0.0) * 2.1
-                small = F.interpolate(bright.unsqueeze(0), scale_factor=0.25, mode="bilinear", align_corners=False)
-                blur = F.conv2d(small, k_h, padding=(0, k_size // 2), groups=3)
-                blur = F.conv2d(blur, k_v, padding=(k_size // 2, 0), groups=3)
-                bloom = F.interpolate(blur, size=(H, W), mode="bilinear", align_corners=False).squeeze(0)
+                # Subtle warm soft-focus sunlit glow halo on CUDA GPU
+                small_bg = F.interpolate(bg.unsqueeze(0), scale_factor=0.25, mode="bilinear", align_corners=False)
+                soft_glow = F.conv2d(small_bg, k_h, padding=(0, k_size // 2), groups=3)
+                soft_glow = F.conv2d(soft_glow, k_v, padding=(k_size // 2, 0), groups=3)
+                soft_glow = F.interpolate(soft_glow, size=(H, W), mode="bilinear", align_corners=False).squeeze(0)
+                bg = bg * 0.88 + soft_glow * 0.12
 
-                # Alpha-composite UI + GPU Bloom + optical vignette
-                comp = bg * (1.0 - fg_a) + fg_rgb * fg_a + bloom * 0.26
-                comp = comp * vignette
-
-                # Subtle deterministic anti-banding dither
+                # Crisp editorial alpha composite + gentle daylight edge framing
+                comp = (bg * (1.0 - fg_a) + fg_rgb * fg_a) * vignette
                 comp = torch.clamp(comp, 0.0, 1.0)
                 out_u8 = (comp.permute(1, 2, 0) * 255.0).to(torch.uint8).cpu().numpy()
                 proc.stdin.write(out_u8.tobytes())

@@ -6,27 +6,27 @@
   "segments": [
     {
       "sceneId": "scene1",
-      "startSec": 0.2,
+      "startSec": 0.25,
       "endSec": 8.6,
-      "text": "One teammate is drowning in tasks. Another has hours to spare. You only notice when someone burns out."
+      "text": "Four weekends in a row. Logging in later every week. And nobody asks if you’re okay."
     },
     {
       "sceneId": "scene2",
       "startSec": 9.3,
-      "endSec": 18.2,
-      "text": "Employetics watches your team every day, and flags who is heading for burnout."
+      "endSec": 19.3,
+      "text": "Employetics shows you your own burnout risk, and spots patterns you might miss."
     },
     {
       "sceneId": "scene3",
-      "startSec": 19.3,
-      "endSec": 30.5,
-      "text": "One click gives a fairer split. In this demo, the most overloaded teammate drops from 115 percent to 88 percent capacity."
+      "startSec": 20.3,
+      "endSec": 30.4,
+      "text": "Take a one-minute check-in. It’s private. Never shared with HR."
     },
     {
       "sceneId": "scene4",
       "startSec": 31.25,
-      "endSec": 34.7,
-      "text": "A balanced team. Before burnout, not after."
+      "endSec": 34.6,
+      "text": "Know when to slow down."
     },
     {
       "sceneId": "scene5",

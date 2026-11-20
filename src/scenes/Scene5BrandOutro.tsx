@@ -20,32 +20,31 @@ export const Scene5BrandOutro: React.FC = () => {
     easing: Easing.out(Easing.cubic),
   });
 
-  const haloScale = interpolate(frame, [0, 90], [0.65, 1.12], {
+  const ringScale = interpolate(frame, [0, 90], [0.72, 1.08], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.cubic),
   });
-  const haloBreath = 1 + 0.04 * Math.sin(frame * 0.06);
 
   const tag1Spring = spring({
-    frame: Math.max(0, frame - 68),
+    frame: Math.max(0, frame - 66),
     fps,
     config: { damping: 14, stiffness: 120 },
   });
 
   const tag2Spring = spring({
-    frame: Math.max(0, frame - 122),
+    frame: Math.max(0, frame - 118),
     fps,
     config: { damping: 14, stiffness: 120 },
   });
 
   const ctaSpring = spring({
-    frame: Math.max(0, frame - 170),
+    frame: Math.max(0, frame - 166),
     fps,
     config: { damping: 16, stiffness: 110 },
   });
 
-  const lineWidth = interpolate(frame, [45, 95], [0, 340], {
+  const ruleWidth = interpolate(frame, [42, 92], [0, 320], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.bezier(0.22, 1, 0.36, 1),
@@ -61,95 +60,51 @@ export const Scene5BrandOutro: React.FC = () => {
         flexDirection: "column",
       }}
     >
-      {/* Radiant Signature Aura Halo */}
-      <div
+      {/* Warm Sunlit Golden-Sage Editorial Compass Rings */}
+      <svg
+        width="860"
+        height="860"
+        viewBox="0 0 860 860"
         style={{
           position: "absolute",
-          width: 860,
-          height: 860,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(99, 102, 241, 0.24) 0%, rgba(6, 182, 212, 0.14) 38%, transparent 70%)",
-          transform: `scale(${haloScale * haloBreath})`,
+          opacity: 0.28 * sceneIn,
+          transform: `rotate(${frame * 0.16}deg) scale(${ringScale})`,
           pointerEvents: "none",
         }}
-      />
-
-      {/* Counter-Rotating Concentric Precision Orbital Rings */}
+      >
+        <circle
+          cx="430"
+          cy="430"
+          r="370"
+          stroke={COLORS.sage}
+          strokeWidth="1.2"
+          strokeDasharray="8 14"
+          fill="none"
+        />
+      </svg>
       <svg
-        width="820"
-        height="820"
-        viewBox="0 0 820 820"
+        width="680"
+        height="680"
+        viewBox="0 0 680 680"
         style={{
           position: "absolute",
           opacity: 0.24 * sceneIn,
-          transform: `rotate(${frame * 0.22}deg) scale(${haloScale})`,
+          transform: `rotate(${-frame * 0.22}deg) scale(${ringScale})`,
           pointerEvents: "none",
         }}
       >
         <circle
-          cx="410"
-          cy="410"
-          r="355"
-          stroke="url(#outroRing)"
-          strokeWidth="1.4"
-          strokeDasharray="10 14"
-          fill="none"
-        />
-        <defs>
-          <linearGradient id="outroRing" x1="0" y1="0" x2="820" y2="820" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#6366F1" />
-            <stop offset="50%" stopColor="#22D3EE" />
-            <stop offset="100%" stopColor="#34D399" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <svg
-        width="640"
-        height="640"
-        viewBox="0 0 640 640"
-        style={{
-          position: "absolute",
-          opacity: 0.16 * sceneIn,
-          transform: `rotate(${-frame * 0.3}deg) scale(${haloScale})`,
-          pointerEvents: "none",
-        }}
-      >
-        <circle
-          cx="320"
-          cy="320"
-          r="270"
-          stroke="#22D3EE"
-          strokeWidth="1"
-          strokeDasharray="4 18"
+          cx="340"
+          cy="340"
+          r="290"
+          stroke={COLORS.amber}
+          strokeWidth="1.2"
+          strokeDasharray="4 16"
           fill="none"
         />
       </svg>
 
-      {/* Anamorphic light flare sweep across brand lockup */}
-      <div
-        style={{
-          position: "absolute",
-          top: "42%",
-          left: `${interpolate(frame, [16, 78], [-15, 115], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-            easing: Easing.inOut(Easing.cubic),
-          })}%`,
-          width: 420,
-          height: 5,
-          borderRadius: 999,
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(129,140,248,0.6) 35%, rgba(255,255,255,0.95) 50%, rgba(34,211,238,0.6) 65%, transparent 100%)",
-          opacity: interpolate(frame, [16, 32, 62, 78], [0, 0.85, 0.85, 0], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Center Brand Lockup */}
+      {/* Editorial Brand Lockup */}
       <div
         style={{
           position: "relative",
@@ -157,38 +112,39 @@ export const Scene5BrandOutro: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 36,
+          gap: 34,
         }}
       >
-        <EmployeticsLogo size={116} showWordmark animateIn delayFrames={8} />
+        <EmployeticsLogo size={118} showWordmark animateIn delayFrames={8} />
 
+        {/* Warm Gold Editorial Hairline Divider */}
         <div
           style={{
-            width: lineWidth,
+            width: ruleWidth,
             height: 2,
             borderRadius: 999,
-            background:
-              "linear-gradient(90deg, transparent 0%, #6366F1 25%, #22D3EE 75%, transparent 100%)",
+            background: "linear-gradient(90deg, transparent 0%, #D97706 30%, #15803D 70%, transparent 100%)",
           }}
         />
 
+        {/* Sculptural Serif Two-Beat Tagline */}
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            gap: 24,
-            fontFamily: FONTS.display,
-            fontSize: 64,
-            fontWeight: 800,
-            letterSpacing: "-0.035em",
+            alignItems: "baseline",
+            gap: 22,
+            fontFamily: FONTS.serif,
+            fontSize: 68,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
             lineHeight: 1.1,
           }}
         >
           <span
             style={{
-              color: COLORS.textPrimary,
+              color: COLORS.ink,
               opacity: tag1Spring,
-              transform: `translateY(${interpolate(tag1Spring, [0, 1], [32, 0])}px)`,
+              transform: `translateY(${interpolate(tag1Spring, [0, 1], [28, 0])}px)`,
               display: "inline-block",
             }}
           >
@@ -196,11 +152,10 @@ export const Scene5BrandOutro: React.FC = () => {
           </span>
           <span
             style={{
-              background: "linear-gradient(90deg, #818CF8 0%, #22D3EE 55%, #34D399 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              fontFamily: FONTS.serifItalic,
+              color: COLORS.forest,
               opacity: tag2Spring,
-              transform: `translateY(${interpolate(tag2Spring, [0, 1], [32, 0])}px)`,
+              transform: `translateY(${interpolate(tag2Spring, [0, 1], [28, 0])}px)`,
               display: "inline-block",
             }}
           >
@@ -208,19 +163,20 @@ export const Scene5BrandOutro: React.FC = () => {
           </span>
         </div>
 
+        {/* Tactile Ceramic CTA Pill */}
         <div
           style={{
             opacity: ctaSpring,
-            transform: `translateY(${interpolate(ctaSpring, [0, 1], [22, 0])}px)`,
-            marginTop: 12,
+            transform: `translateY(${interpolate(ctaSpring, [0, 1], [20, 0])}px)`,
+            marginTop: 10,
             display: "inline-flex",
             alignItems: "center",
             gap: 12,
-            padding: "14px 32px",
+            padding: "14px 34px",
             borderRadius: 999,
-            background: "rgba(15, 23, 42, 0.80)",
-            border: "1px solid rgba(129, 140, 248, 0.44)",
-            boxShadow: "0 12px 38px rgba(2, 6, 23, 0.55), 0 0 28px rgba(99, 102, 241, 0.25)",
+            background: COLORS.paperCard,
+            border: "1.5px solid rgba(20, 83, 45, 0.24)",
+            boxShadow: "0 16px 36px rgba(28, 25, 23, 0.08)",
           }}
         >
           <span
@@ -228,17 +184,15 @@ export const Scene5BrandOutro: React.FC = () => {
               width: 10,
               height: 10,
               borderRadius: "50%",
-              background: COLORS.emeraldBright,
-              boxShadow: `0 0 12px ${COLORS.emeraldBright}`,
+              background: COLORS.sage,
             }}
           />
           <span
             style={{
               fontFamily: FONTS.mono,
               fontSize: 20,
-              fontWeight: 600,
               letterSpacing: "0.04em",
-              color: COLORS.textPrimary,
+              color: COLORS.ink,
             }}
           >
             employetics.ai

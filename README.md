@@ -1,8 +1,8 @@
-# Employetics — 40s Complete Motion Graphics Video Ad
+# Employetics — 40s Workload Rebalance Motion Graphics Ad
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/abdullahmehmood1/EmployeticsAD/blob/main/colab/render_employetics_ad.ipynb)
 
-A broadcast-grade **40-second, 1080p 60fps** SaaS motion-graphics commercial for **Employetics**, built with **Remotion (React + TypeScript + SVG + Spring Physics)**, **Kokoro-82M GPU Neural Voiceover**, **procedural soundtrack & UI sound effects**, and a **one-click Google Colab GPU rendering notebook**.
+A broadcast-grade **40-second, 1080p / 4K @ 60fps** SaaS motion-graphics commercial for **Employetics**, built with a **Zero-Blink NVIDIA GPU Pipeline** (**Remotion transparent RGBA UI layers** + **PyTorch CUDA GPU Liquid Aurora Shader & Physical Optical Bloom** + **Direct NVIDIA NVENC `h264_nvenc` hardware encoding** + **Studio Broadcast `-14 LUFS` Voiceover & Soundtrack**).
 
 ---
 
@@ -10,46 +10,17 @@ A broadcast-grade **40-second, 1080p 60fps** SaaS motion-graphics commercial for
 
 | Time | Scene | Voiceover | Visual Motion Graphics |
 | :--- | :--- | :--- | :--- |
-| **0–9 s** | `Scene1Resignation` | *"Your best developer just resigned. No warning. But the signs were there: late nights, lost weekends, falling feedback. Hidden in the data."* | 3D resignation email notification + shockwave ring → kinetic *"No warning."* + data scanner sweep → staggered telemetry cards (after-hours commit chart, weekend heatmap, falling feedback sparkline) |
-| **9–16 s** | `Scene2RiskRanking` | *"Employetics reads daily attendance, tasks and feedback, and ranks who is likely to leave."* | Animated glowing data streams converging into the Employetics Engine hub → live **Attrition Risk Ranking** leaderboard with animated circular risk gauges |
-| **16–24 s** | `Scene3WhyDrivers` | *"It also tells you why. Overtime. Falling peer feedback. So you fix the real cause."* | Explainable AI breakdown panel with 91% radial gauge, animated SHAP driver bars (*Overtime Hours*, *Falling Peer Feedback*, *Sprint Task Overload*), and *Fix the Real Cause* action banner |
-| **24–31 s** | `Scene4HRAssistant` | *"Or just ask the HR assistant. It answers in seconds, from your own data."* | Sleek dark-glass AI HR Copilot with live character-by-character prompt typing, instant grounded response (`⚡ 1.2s`), and one-click action chips |
-| **31–35 s** | `Scene5ActBefore` | *"Act weeks before the resignation letter."* | Animated proactive retention timeline dropping risk live from **91% → 24% Healthy & Retained**, crossing out the resignation letter |
-| **35–40 s** | `Scene6BrandOutro` | *"Employetics. Predict burnout. Keep your people."* | Custom animated Employetics vector logo reveal, radiant aurora halo, two-beat kinetic tagline, and `employetics.ai` CTA |
+| **0–9 s** | `Scene1Imbalance` | *"One teammate is drowning in tasks. Another has hours to spare. You only notice when someone burns out."* | Split comparison: **Alex Rivera (`115% OVERLOADED`)** with piling task stack vs **Samira Patel (`54% • +19 hrs available`)**, `61% GAP` badge, crimson burnout threshold hit & kinetic headline |
+| **9–19 s** | `Scene2DailyMonitor` | *"Employetics watches your team every day, and flags who is heading for burnout."* | Live **Daily Capacity & Burnout Radar** sweeping Mon → Fri across all 5 teammates with dashed `100% Limit` line, flagging **Alex Rivera (`115% HEADING FOR BURNOUT`)** |
+| **19–31 s** | `Scene3OneClickSplit` | *"One click gives a fairer split. In this demo, the most overloaded teammate drops from 115 percent to 88 percent capacity."* | Automated pointer cursor clicks **`Rebalance Team Workload`** → 3 task pills visibly arc across screen to teammates with spare capacity → hero radial gauge drops live **`115% → 88% (-27% LOAD)`** |
+| **31–35 s** | `Scene4BalancedTeam` | *"A balanced team. Before burnout, not after."* | 5 harmonious emerald/cyan capacity rings (`88%`, `85%`, `82%`, `82%`, `79%`), `100% TEAM SUSTAINABLE • 0 OVERLOADED` badge, two-beat kinetic headline |
+| **35–40 s** | `Scene5BrandOutro` | *"Employetics. Predict burnout. Keep your people."* | Counter-rotating orbital rings, animated Employetics logo mark, anamorphic light sweep, *"Predict burnout. Keep your people."* & `employetics.ai` |
 
 ---
 
-## Render on Google Colab (GPU Accelerated)
+## Render on Google Colab (Zero-Blink NVIDIA GPU)
 
-1. Open [`colab/render_employetics_ad.ipynb`](colab/render_employetics_ad.ipynb) in **Google Colab**.
+1. Click the **Open In Colab** badge above (or open [`colab/render_employetics_ad.ipynb`](colab/render_employetics_ad.ipynb)).
 2. Go to **Runtime → Change runtime type** and select **T4 GPU** (or **L4 / A100 GPU**).
-3. In **Step 1 (Configuration)**, verify `GITHUB_REPO_URL` and pick your preferred voice, captions setting, and resolution (`1080p` or `4K`).
+3. In **Step 1**, choose your voiceover mode (`edge`, `upload_my_voiceover`, `chatterbox`, `elevenlabs`, or `kokoro`), `BURN_CAPTIONS`, and resolution (`1080p` or `4K`).
 4. Click **Runtime → Run all**.
-5. Colab will automatically:
-   - Install Node.js 22, Chromium GPU libraries, `espeak-ng`, and Kokoro-82M neural TTS
-   - Generate studio-grade neural voiceover + custom modern SaaS soundtrack + synchronized UI SFX + `.srt` captions
-   - Render the 40-second 60fps motion graphics video with GPU hardware acceleration (`--gl=angle-egl` + NVIDIA `h264_nvenc` mastering)
-   - Preview and download `employetics-ad-1080p60.mp4` and `captions.srt`
-
----
-
-## Run & Preview Locally
-
-```bash
-# 1. Install Node.js dependencies
-npm install
-
-# 2. Install Python audio dependencies
-pip install -r requirements.txt
-
-# 3. Generate voiceover, soundtrack, SFX, and synchronized captions manifest
-python scripts/generate_audio.py
-
-# 4. Preview interactively in Remotion Studio
-npm run dev
-
-# 5. Render final 1080p 60fps MP4
-python scripts/render_video.py
-```
-
-Add `--captions` to `python scripts/render_video.py --captions` to burn synchronized kinetic captions directly into the video.

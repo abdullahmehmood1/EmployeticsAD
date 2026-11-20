@@ -46,75 +46,56 @@ SCENES = [
         "id": "scene1",
         "startSec": 0.0,
         "endSec": 9.0,
-        "leadIn": 0.15,
-        "tailPad": 0.15,
+        "leadIn": 0.20,
+        "tailPad": 0.20,
         "displayText": (
-            "Your best developer just resigned. No warning. "
-            "But the signs were there: late nights, lost weekends, "
-            "falling feedback. Hidden in the data."
+            "One teammate is drowning in tasks. Another has hours to spare. "
+            "You only notice when someone burns out."
         ),
         "ttsText": (
-            "Your best developer just resigned. No warning. "
-            "But the signs were there: late nights, lost weekends, "
-            "falling feedback. Hidden in the data."
+            "One teammate is drowning in tasks. Another has hours to spare. "
+            "You only notice when someone burns out."
         ),
     },
     {
         "id": "scene2",
         "startSec": 9.0,
-        "endSec": 16.0,
-        "leadIn": 0.25,
-        "tailPad": 0.20,
+        "endSec": 19.0,
+        "leadIn": 0.30,
+        "tailPad": 0.30,
         "displayText": (
-            "Employetics reads daily attendance, tasks and feedback, "
-            "and ranks who is likely to leave."
+            "Employetics watches your team every day, and flags who is heading for burnout."
         ),
         "ttsText": (
-            "Employetics reads daily attendance, tasks, and feedback — "
-            "and ranks who is likely to leave."
+            "Employetics watches your team every day — and flags who is heading for burnout."
         ),
     },
     {
         "id": "scene3",
-        "startSec": 16.0,
-        "endSec": 24.0,
+        "startSec": 19.0,
+        "endSec": 31.0,
         "leadIn": 0.25,
-        "tailPad": 0.20,
+        "tailPad": 0.25,
         "displayText": (
-            "It also tells you why. Overtime. Falling peer feedback. "
-            "So you fix the real cause."
+            "One click gives a fairer split. In this demo, the most overloaded teammate "
+            "drops from 115 percent to 88 percent capacity."
         ),
         "ttsText": (
-            "It also tells you why. Overtime. Falling peer feedback. "
-            "So you fix the real cause."
+            "One click gives a fairer split. In this demo, the most overloaded teammate "
+            "drops from 115 percent to 88 percent capacity."
         ),
     },
     {
         "id": "scene4",
-        "startSec": 24.0,
-        "endSec": 31.0,
-        "leadIn": 0.25,
+        "startSec": 31.0,
+        "endSec": 35.0,
+        "leadIn": 0.20,
         "tailPad": 0.20,
-        "displayText": (
-            "Or just ask the HR assistant. "
-            "It answers in seconds, from your own data."
-        ),
-        "ttsText": (
-            "Or just ask the HR assistant. "
-            "It answers in seconds, from your own data."
-        ),
+        "displayText": "A balanced team. Before burnout, not after.",
+        "ttsText": "A balanced team. Before burnout, not after.",
     },
     {
         "id": "scene5",
-        "startSec": 31.0,
-        "endSec": 35.0,
-        "leadIn": 0.25,
-        "tailPad": 0.20,
-        "displayText": "Act weeks before the resignation letter.",
-        "ttsText": "Act weeks before the resignation letter.",
-    },
-    {
-        "id": "scene6",
         "startSec": 35.0,
         "endSec": 40.0,
         "leadIn": 0.30,
@@ -541,21 +522,18 @@ def generate_music_and_sfx(sr: int) -> np.ndarray:
     bed = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
 
     chords = [
-        # Scene 1 (0-9s): Warm moody minor tension
+        # Scene 1 (0-9s): Moody workload imbalance tension
         (0.0, 4.8, [45, 57, 60, 64, 71], 680.0, 0.22),
         (4.3, 5.1, [45, 53, 60, 64, 69], 780.0, 0.23),
-        # Scene 2 (9-16s): Uplifting clean SaaS reveal
-        (8.9, 3.8, [53, 60, 64, 69], 1020.0, 0.24),
-        (12.3, 4.0, [55, 62, 64, 67], 1080.0, 0.24),
-        # Scene 3 (16-24s): Focused momentum
-        (15.9, 4.3, [50, 57, 60, 64], 1000.0, 0.24),
-        (19.8, 4.5, [48, 55, 60, 64, 71], 1120.0, 0.25),
-        # Scene 4 (24-31s): Sleek modern AI
-        (23.9, 3.8, [53, 60, 64, 69], 1150.0, 0.23),
-        (27.3, 4.0, [55, 62, 67, 71], 1200.0, 0.24),
-        # Scene 5 (31-35s): Hopeful resolution
+        # Scene 2 (9-19s): Clean daily monitoring SaaS pulse
+        (8.9, 5.2, [53, 60, 64, 69], 1020.0, 0.24),
+        (13.8, 5.5, [55, 62, 64, 67], 1080.0, 0.24),
+        # Scene 3 (19-31s): One-click rebalance & uplifting resolution
+        (18.9, 6.2, [50, 57, 60, 64], 1080.0, 0.24),
+        (24.7, 6.5, [48, 55, 60, 64, 71], 1220.0, 0.25),
+        # Scene 4 (31-35s): Balanced team harmony
         (30.9, 4.3, [53, 60, 64, 67, 74], 1280.0, 0.26),
-        # Scene 6 (35-40s): Clean warm brand resolve
+        # Scene 5 (35-40s): Clean warm brand resolve
         (34.9, 5.1, [48, 55, 60, 64, 67], 1350.0, 0.28),
     ]
     for start, dur, notes, cutoff, gain in chords:
@@ -573,21 +551,28 @@ def generate_music_and_sfx(sr: int) -> np.ndarray:
         add_stereo(bed, pulse, t_cursor, gain=0.13)
         t_cursor += beat_sec
 
-    # Tasteful, unobtrusive UI sound effects
+    # Tasteful UI sound effects synced exactly to the new 5-scene beats
     sfx = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
-    add_stereo(sfx, make_soft_bell(659.25, 0.45, sr, pan=0.0), 0.14, gain=0.11)
-    add_stereo(sfx, make_warm_sub(0.85, sr), 2.25, gain=0.16)
-    add_stereo(sfx, make_air_whoosh(0.75, 280.0, 1300.0, sr), 3.40, gain=0.11)
-    add_stereo(sfx, make_air_whoosh(0.85, 240.0, 1600.0, sr), 8.50, gain=0.12)
-    add_stereo(sfx, make_soft_bell(523.25, 0.65, sr, pan=-0.2), 9.12, gain=0.09)
-    add_stereo(sfx, make_soft_bell(783.99, 0.75, sr, pan=0.2), 9.26, gain=0.09)
-    add_stereo(sfx, make_air_whoosh(0.55, 320.0, 1200.0, sr), 15.75, gain=0.09)
-    add_stereo(sfx, make_soft_bell(783.99, 0.45, sr, pan=0.0), 21.35, gain=0.09)
-    add_stereo(sfx, make_soft_bell(880.0, 0.45, sr, pan=-0.15), 27.00, gain=0.09)
-    add_stereo(sfx, make_air_whoosh(0.85, 260.0, 1500.0, sr), 31.10, gain=0.10)
-    add_stereo(sfx, make_soft_bell(659.25, 0.65, sr, pan=-0.2), 33.05, gain=0.10)
-    add_stereo(sfx, make_soft_bell(1046.50, 0.85, sr, pan=0.2), 33.18, gain=0.10)
-    # Clean outro brand sting
+    # Scene 1 (0-9s): Overload card, Spare card, Burnout threshold hit
+    add_stereo(sfx, make_soft_bell(587.33, 0.40, sr, pan=-0.3), 0.25, gain=0.10)
+    add_stereo(sfx, make_soft_bell(659.25, 0.45, sr, pan=0.3), 2.80, gain=0.10)
+    add_stereo(sfx, make_warm_sub(0.85, sr), 5.70, gain=0.17)
+    add_stereo(sfx, make_air_whoosh(0.80, 240.0, 1500.0, sr), 8.55, gain=0.12)
+    # Scene 2 (9-19s): Daily radar reveal + Burnout flag at 13.8s
+    add_stereo(sfx, make_soft_bell(523.25, 0.65, sr, pan=-0.2), 9.15, gain=0.09)
+    add_stereo(sfx, make_soft_bell(783.99, 0.75, sr, pan=0.2), 9.30, gain=0.09)
+    add_stereo(sfx, make_soft_bell(880.0, 0.50, sr, pan=0.0), 13.80, gain=0.11)
+    add_stereo(sfx, make_air_whoosh(0.60, 280.0, 1400.0, sr), 18.65, gain=0.11)
+    # Scene 3 (19-31s): One-click rebalance button click at 20.8s + flying task arcs + 88% arrival
+    add_stereo(sfx, make_soft_bell(987.77, 0.35, sr, pan=0.25), 20.80, gain=0.13)
+    add_stereo(sfx, make_air_whoosh(0.75, 320.0, 1600.0, sr), 21.15, gain=0.10)
+    add_stereo(sfx, make_air_whoosh(0.70, 360.0, 1700.0, sr), 21.65, gain=0.09)
+    add_stereo(sfx, make_soft_bell(659.25, 0.60, sr, pan=-0.2), 25.30, gain=0.11)
+    add_stereo(sfx, make_soft_bell(1046.50, 0.85, sr, pan=0.2), 25.44, gain=0.12)
+    # Scene 4 (31-35s): Balanced team harmony shimmer
+    add_stereo(sfx, make_air_whoosh(0.80, 260.0, 1500.0, sr), 30.75, gain=0.10)
+    add_stereo(sfx, make_soft_bell(783.99, 0.80, sr, pan=0.0), 31.25, gain=0.10)
+    # Scene 5 (35-40s): Clean Employetics brand sting
     add_stereo(sfx, make_warm_sub(1.3, sr), 35.10, gain=0.16)
     add_stereo(sfx, make_soft_bell(523.25, 1.3, sr, pan=-0.25), 35.12, gain=0.11)
     add_stereo(sfx, make_soft_bell(783.99, 1.6, sr, pan=0.25), 35.26, gain=0.11)

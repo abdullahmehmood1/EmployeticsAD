@@ -33,18 +33,17 @@ export const VIDEO_CONFIG = {
 
 export const SCENES = {
   scene1: { id: "scene1", startSec: 0, endSec: 9, startFrame: 0, durationFrames: 540 },
-  scene2: { id: "scene2", startSec: 9, endSec: 16, startFrame: 540, durationFrames: 420 },
-  scene3: { id: "scene3", startSec: 16, endSec: 24, startFrame: 960, durationFrames: 480 },
-  scene4: { id: "scene4", startSec: 24, endSec: 31, startFrame: 1440, durationFrames: 420 },
-  scene5: { id: "scene5", startSec: 31, endSec: 35, startFrame: 1860, durationFrames: 240 },
-  scene6: { id: "scene6", startSec: 35, endSec: 40, startFrame: 2100, durationFrames: 300 },
+  scene2: { id: "scene2", startSec: 9, endSec: 19, startFrame: 540, durationFrames: 600 },
+  scene3: { id: "scene3", startSec: 19, endSec: 31, startFrame: 1140, durationFrames: 720 },
+  scene4: { id: "scene4", startSec: 31, endSec: 35, startFrame: 1860, durationFrames: 240 },
+  scene5: { id: "scene5", startSec: 35, endSec: 40, startFrame: 2100, durationFrames: 300 },
 } as const;
 
 export const COLORS = {
   bgDeep: "#050814",
   bgSurface: "#0B1120",
-  bgCard: "rgba(15, 23, 42, 0.76)",
-  bgCardElevated: "rgba(22, 33, 58, 0.86)",
+  bgCard: "rgba(15, 23, 42, 0.78)",
+  bgCardElevated: "rgba(22, 33, 58, 0.88)",
   borderSubtle: "rgba(148, 163, 184, 0.16)",
   borderGlow: "rgba(99, 102, 241, 0.45)",
 

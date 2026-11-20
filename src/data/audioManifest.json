@@ -1,43 +1,37 @@
 {
-  "voice": "en-US-AndrewMultilingualNeural",
+  "voice": "edge:en-US-AndrewMultilingualNeural",
   "durationSec": 40,
   "masterAudioFile": "audio/master_audio.wav",
   "hasGeneratedAudio": false,
   "segments": [
     {
       "sceneId": "scene1",
-      "startSec": 0.25,
-      "endSec": 8.7,
-      "text": "Your best developer just resigned. No warning. But the signs were there: late nights, lost weekends, falling feedback. Hidden in the data."
+      "startSec": 0.2,
+      "endSec": 8.6,
+      "text": "One teammate is drowning in tasks. Another has hours to spare. You only notice when someone burns out."
     },
     {
       "sceneId": "scene2",
-      "startSec": 9.25,
-      "endSec": 15.6,
-      "text": "Employetics reads daily attendance, tasks and feedback, and ranks who is likely to leave."
+      "startSec": 9.3,
+      "endSec": 18.2,
+      "text": "Employetics watches your team every day, and flags who is heading for burnout."
     },
     {
       "sceneId": "scene3",
-      "startSec": 16.25,
-      "endSec": 23.5,
-      "text": "It also tells you why. Overtime. Falling peer feedback. So you fix the real cause."
+      "startSec": 19.3,
+      "endSec": 30.5,
+      "text": "One click gives a fairer split. In this demo, the most overloaded teammate drops from 115 percent to 88 percent capacity."
     },
     {
       "sceneId": "scene4",
-      "startSec": 24.25,
-      "endSec": 30.6,
-      "text": "Or just ask the HR assistant. It answers in seconds, from your own data."
+      "startSec": 31.25,
+      "endSec": 34.7,
+      "text": "A balanced team. Before burnout, not after."
     },
     {
       "sceneId": "scene5",
-      "startSec": 31.2,
-      "endSec": 34.7,
-      "text": "Act weeks before the resignation letter."
-    },
-    {
-      "sceneId": "scene6",
-      "startSec": 35.2,
-      "endSec": 39.2,
+      "startSec": 35.25,
+      "endSec": 39.3,
       "text": "Employetics. Predict burnout. Keep your people."
     }
   ]

@@ -10,7 +10,7 @@ import {
 import { EmployeticsLogo } from "../components/EmployeticsLogo";
 import { COLORS, FONTS } from "../theme";
 
-export const Scene6BrandOutro: React.FC = () => {
+export const Scene5BrandOutro: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -20,7 +20,6 @@ export const Scene6BrandOutro: React.FC = () => {
     easing: Easing.out(Easing.cubic),
   });
 
-  // Expanding luminous halo behind logo
   const haloScale = interpolate(frame, [0, 90], [0.65, 1.12], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -28,28 +27,24 @@ export const Scene6BrandOutro: React.FC = () => {
   });
   const haloBreath = 1 + 0.04 * Math.sin(frame * 0.06);
 
-  // Beat 1: "Predict burnout." (~36.2s -> local frame 72)
   const tag1Spring = spring({
     frame: Math.max(0, frame - 68),
     fps,
     config: { damping: 14, stiffness: 120 },
   });
 
-  // Beat 2: "Keep your people." (~37.2s -> local frame 130)
   const tag2Spring = spring({
     frame: Math.max(0, frame - 122),
     fps,
     config: { damping: 14, stiffness: 120 },
   });
 
-  // Subtle CTA / Website Pill (~38.0s -> local frame 175)
   const ctaSpring = spring({
     frame: Math.max(0, frame - 170),
     fps,
     config: { damping: 16, stiffness: 110 },
   });
 
-  // Subtle divider bar sweep
   const lineWidth = interpolate(frame, [45, 95], [0, 340], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -70,12 +65,11 @@ export const Scene6BrandOutro: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          width: 900,
-          height: 900,
+          width: 860,
+          height: 860,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, rgba(6, 182, 212, 0.16) 38%, transparent 70%)",
-          filter: "blur(42px)",
+            "radial-gradient(circle, rgba(99, 102, 241, 0.24) 0%, rgba(6, 182, 212, 0.14) 38%, transparent 70%)",
           transform: `scale(${haloScale * haloBreath})`,
           pointerEvents: "none",
         }}
@@ -143,7 +137,7 @@ export const Scene6BrandOutro: React.FC = () => {
             easing: Easing.inOut(Easing.cubic),
           })}%`,
           width: 420,
-          height: 6,
+          height: 5,
           borderRadius: 999,
           background:
             "linear-gradient(90deg, transparent 0%, rgba(129,140,248,0.6) 35%, rgba(255,255,255,0.95) 50%, rgba(34,211,238,0.6) 65%, transparent 100%)",
@@ -151,12 +145,11 @@ export const Scene6BrandOutro: React.FC = () => {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           }),
-          filter: "blur(8px)",
           pointerEvents: "none",
         }}
       />
 
-      {/* Center Lockup */}
+      {/* Center Brand Lockup */}
       <div
         style={{
           position: "relative",
@@ -167,10 +160,8 @@ export const Scene6BrandOutro: React.FC = () => {
           gap: 36,
         }}
       >
-        {/* Hero Animated Brand Logo */}
         <EmployeticsLogo size={116} showWordmark animateIn delayFrames={8} />
 
-        {/* Subtle Glowing Divider */}
         <div
           style={{
             width: lineWidth,
@@ -181,7 +172,6 @@ export const Scene6BrandOutro: React.FC = () => {
           }}
         />
 
-        {/* Two-Beat Kinetic Tagline */}
         <div
           style={{
             display: "flex",
@@ -212,14 +202,12 @@ export const Scene6BrandOutro: React.FC = () => {
               opacity: tag2Spring,
               transform: `translateY(${interpolate(tag2Spring, [0, 1], [32, 0])}px)`,
               display: "inline-block",
-              filter: "drop-shadow(0 0 28px rgba(34, 211, 238, 0.30))",
             }}
           >
             Keep your people.
           </span>
         </div>
 
-        {/* Clean CTA Pill */}
         <div
           style={{
             opacity: ctaSpring,
@@ -230,8 +218,8 @@ export const Scene6BrandOutro: React.FC = () => {
             gap: 12,
             padding: "14px 32px",
             borderRadius: 999,
-            background: "rgba(15, 23, 42, 0.78)",
-            border: "1px solid rgba(129, 140, 248, 0.42)",
+            background: "rgba(15, 23, 42, 0.80)",
+            border: "1px solid rgba(129, 140, 248, 0.44)",
             boxShadow: "0 12px 38px rgba(2, 6, 23, 0.55), 0 0 28px rgba(99, 102, 241, 0.25)",
           }}
         >

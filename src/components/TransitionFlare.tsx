@@ -2,19 +2,17 @@ import React from "react";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { COLORS, SCENES, VIDEO_CONFIG } from "../theme";
 
-// Cut points between the 6 scenes (in frames @ 60fps)
+// Exact scene transition points (9s, 19s, 31s, 35s)
 const CUT_FRAMES = [
   SCENES.scene2.startFrame, // 540 (9s)
-  SCENES.scene3.startFrame, // 960 (16s)
-  SCENES.scene4.startFrame, // 1440 (24s)
-  SCENES.scene5.startFrame, // 1860 (31s)
-  SCENES.scene6.startFrame, // 2100 (35s)
+  SCENES.scene3.startFrame, // 1140 (19s)
+  SCENES.scene4.startFrame, // 1860 (31s)
+  SCENES.scene5.startFrame, // 2100 (35s)
 ];
 
 export const TransitionFlare: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Compute nearest transition optical sweep
   let flareStrength = 0;
   let sweepProgress = 0;
   let flareColor: string = COLORS.cyanBright;
@@ -36,19 +34,17 @@ export const TransitionFlare: React.FC = () => {
       flareColor =
         i === 0
           ? COLORS.indigoBright
-          : i === 3
+          : i === 2
           ? COLORS.emeraldBright
           : COLORS.cyanBright;
       break;
     }
   }
 
-  // Ultra-subtle 2.5px brand progress hairline along the bottom edge
   const progressPct = (frame / VIDEO_CONFIG.totalFrames) * 100;
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
-      {/* Anamorphic light sweep across scene transitions */}
       {flareStrength > 0.01 && (
         <>
           <div
@@ -57,11 +53,10 @@ export const TransitionFlare: React.FC = () => {
               top: 0,
               bottom: 0,
               left: `${sweepProgress}%`,
-              width: 340,
+              width: 320,
               transform: "translateX(-50%) skewX(-12deg)",
-              background: `linear-gradient(90deg, transparent 0%, ${flareColor}26 42%, rgba(255,255,255,0.45) 50%, ${flareColor}26 58%, transparent 100%)`,
-              opacity: flareStrength * 0.85,
-              filter: "blur(16px)",
+              background: `linear-gradient(90deg, transparent 0%, ${flareColor}28 42%, rgba(255,255,255,0.42) 50%, ${flareColor}28 58%, transparent 100%)`,
+              opacity: flareStrength * 0.8,
             }}
           />
           <div
@@ -74,13 +69,12 @@ export const TransitionFlare: React.FC = () => {
               transform: "translateY(-50%)",
               background: `linear-gradient(90deg, transparent 0%, ${flareColor} 50%, transparent 100%)`,
               opacity: flareStrength * 0.55,
-              filter: "blur(6px)",
             }}
           />
         </>
       )}
 
-      {/* Subtle cinema progress hairline */}
+      {/* Cinema timeline progress hairline */}
       <div
         style={{
           position: "absolute",
@@ -88,7 +82,7 @@ export const TransitionFlare: React.FC = () => {
           right: 0,
           bottom: 0,
           height: 3,
-          background: "rgba(148, 163, 184, 0.10)",
+          background: "rgba(148, 163, 184, 0.12)",
         }}
       >
         <div

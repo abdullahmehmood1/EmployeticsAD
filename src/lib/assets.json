@@ -1,0 +1,14 @@
+{
+  "hasAppDemoVideo": false,
+  "hasAttritionScreen": true,
+  "hasCustomVoiceover": false,
+  "hasMusic": false,
+  "voClips": [],
+  "sfx": {
+    "impact": true,
+    "whoosh": true,
+    "tick": true,
+    "charge": true,
+    "chime": true
+  }
+}

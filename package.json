@@ -1,19 +1,19 @@
 {
   "name": "employetics-ad",
   "version": "1.0.0",
-  "description": "40-second complete motion graphics video commercial for Employetics (Remotion + Neural TTS + Colab GPU rendering)",
+  "description": "40-second kinetic motion-graphics ad for Employetics (Remotion v4, React + TypeScript)",
   "private": true,
   "scripts": {
-    "dev": "remotion studio",
-    "studio": "remotion studio",
+    "sync-assets": "node scripts/sync_assets.mjs",
+    "dev": "node scripts/sync_assets.mjs && remotion studio",
+    "still": "node scripts/sync_assets.mjs && remotion still src/index.ts AdOne",
+    "render": "node scripts/sync_assets.mjs && remotion render src/index.ts AdOne out/ad1.mp4 --codec=h264 --crf=18 --pixel-format=yuv420p",
     "build": "tsc --noEmit",
-    "audio": "python scripts/generate_audio.py",
-    "render": "python scripts/render_video.py",
-    "render:raw": "remotion render src/index.ts EmployeticsAd out/employetics-ad.mp4 --codec=h264 --crf=16 --pixel-format=yuv420p"
+    "sfx": "python scripts/make_sfx.py && node scripts/sync_assets.mjs",
+    "vo": "python scripts/make_voiceover.py && node scripts/sync_assets.mjs"
   },
   "dependencies": {
     "@remotion/google-fonts": "^4.0.250",
-    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "remotion": "^4.0.250"

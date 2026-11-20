@@ -4,18 +4,20 @@ node_modules/
 __pycache__/
 *.pyc
 
-# Build & render outputs
+# Build, render outputs & Colab archives
 out/
 dist/
 build/
 *.mp4
 *.mov
 *.webm
+*.zip
 
-# Generated audio files (rebuilt dynamically in Colab / via scripts/generate_audio.py)
-public/audio/*.wav
+# Optional generated voiceover / mirrored audio (rebuilt by scripts/make_voiceover.py or sync_assets.mjs)
 public/audio/*.mp3
-public/audio/*.srt
+public/audio/*.wav
+public/audio/vo/*.mp3
+public/audio/vo/*.wav
 !public/audio/.gitkeep
 
 # OS & Editor

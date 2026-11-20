@@ -512,6 +512,30 @@ def make_warm_sub(duration: float, sr: int) -> np.ndarray:
     return np.stack([wave, wave], axis=1).astype(np.float32)
 
 
+def apply_subtle_stereo_reverb(stereo: np.ndarray, sr: int, wet: float = 0.24) -> np.ndarray:
+    """Add silky studio room ambience to music & UI chimes via multi-tap stereo feedback delays."""
+    out = stereo.copy()
+    taps = [
+        (0.037, 0.32, 0.26),
+        (0.061, 0.25, 0.30),
+        (0.097, 0.19, 0.17),
+        (0.143, 0.13, 0.15),
+        (0.211, 0.08, 0.09),
+    ]
+    reverb = np.zeros_like(stereo)
+    n = len(stereo)
+    for delay_s, g_l, g_r in taps:
+        d = int(delay_s * sr)
+        if d < n:
+            reverb[d:, 0] += stereo[: n - d, 1] * g_l
+            reverb[d:, 1] += stereo[: n - d, 0] * g_r
+    # Warm low-pass on reverb tail so it feels spacious and velvety
+    sos = signal.butter(2, 2600.0, btype="lowpass", fs=sr, output="sos")
+    reverb[:, 0] = signal.sosfilt(sos, reverb[:, 0])
+    reverb[:, 1] = signal.sosfilt(sos, reverb[:, 1])
+    return (out * (1.0 - wet * 0.35) + reverb * wet).astype(np.float32)
+
+
 def generate_music_and_sfx(sr: int) -> np.ndarray:
     """Subtle, velvety Apple/Linear-style ambient soundtrack + delicate UI SFX."""
     bed = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
@@ -568,7 +592,7 @@ def generate_music_and_sfx(sr: int) -> np.ndarray:
     add_stereo(sfx, make_soft_bell(523.25, 1.3, sr, pan=-0.25), 35.12, gain=0.11)
     add_stereo(sfx, make_soft_bell(783.99, 1.6, sr, pan=0.25), 35.26, gain=0.11)
 
-    combined = bed + sfx
+    combined = apply_subtle_stereo_reverb(bed + sfx, sr, wet=0.26)
     fade_n = int(1.3 * sr)
     fade = np.linspace(1.0, 0.0, fade_n) ** 1.6
     combined[-fade_n:] *= fade[:, None]
@@ -826,6 +850,28 @@ async def build_all_audio(
     write_wav_pcm16(vo_path, vo_mastered, SAMPLE_RATE)
     write_wav_pcm16(music_path, music_sfx, SAMPLE_RATE)
     write_wav_pcm16(master_path, master, SAMPLE_RATE)
+
+    # Final EBU R128 broadcast loudness polish (-14 LUFS, -1.5 dBTP) when supported by FFmpeg
+    if ffmpeg_supports_filter(ffmpeg_bin, "loudnorm"):
+        with tempfile.TemporaryDirectory() as norm_tmp:
+            norm_out = Path(norm_tmp) / "master_lufs.wav"
+            run_ffmpeg(
+                ffmpeg_bin,
+                [
+                    "-i",
+                    str(master_path),
+                    "-af",
+                    "loudnorm=I=-14:TP=-1.5:LRA=9",
+                    "-ar",
+                    str(SAMPLE_RATE),
+                    "-ac",
+                    "2",
+                    str(norm_out),
+                ],
+            )
+            master, _ = read_wav_float32(norm_out)
+            write_wav_pcm16(master_path, master, SAMPLE_RATE)
+
     write_srt(manifest_segments, srt_path)
 
     manifest = {

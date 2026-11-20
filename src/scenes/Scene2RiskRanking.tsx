@@ -280,26 +280,45 @@ export const Scene2RiskRanking: React.FC = () => {
               </linearGradient>
             </defs>
 
-            {/* 3 input curves converging into center hub */}
-            {[108, 240, 372].map((y, idx) => (
-              <g key={idx}>
-                <path
-                  d={`M 0 ${y} C 60 ${y}, 70 240, 120 240`}
-                  stroke="rgba(129, 140, 248, 0.22)"
-                  strokeWidth="3"
-                />
-                <path
-                  d={`M 0 ${y} C 60 ${y}, 70 240, 120 240`}
-                  stroke="url(#flowCyan)"
-                  strokeWidth="3.5"
-                  strokeDasharray="14 18"
-                  strokeDashoffset={dashOffset - idx * 14}
-                  strokeLinecap="round"
-                />
-              </g>
-            ))}
+            {/* 3 input curves converging into center hub + glowing traveling data packets */}
+            {[108, 240, 372].map((y, idx) => {
+              const t = ((frame * 0.022 + idx * 0.33) % 1);
+              const inv = 1 - t;
+              // Exact cubic Bezier evaluation for M 0 y C 60 y, 70 240, 120 240
+              const bx = 3 * inv * inv * t * 60 + 3 * inv * t * t * 70 + t * t * t * 120;
+              const by =
+                inv * inv * inv * y +
+                3 * inv * inv * t * y +
+                3 * inv * t * t * 240 +
+                t * t * t * 240;
+              return (
+                <g key={idx}>
+                  <path
+                    d={`M 0 ${y} C 60 ${y}, 70 240, 120 240`}
+                    stroke="rgba(129, 140, 248, 0.22)"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d={`M 0 ${y} C 60 ${y}, 70 240, 120 240`}
+                    stroke="url(#flowCyan)"
+                    strokeWidth="3.5"
+                    strokeDasharray="14 18"
+                    strokeDashoffset={dashOffset - idx * 14}
+                    strokeLinecap="round"
+                  />
+                  {/* Moving glowing data packet orb */}
+                  <circle
+                    cx={bx}
+                    cy={by}
+                    r="5.5"
+                    fill="#22D3EE"
+                    style={{ filter: "drop-shadow(0 0 10px #22D3EE)" }}
+                  />
+                </g>
+              );
+            })}
 
-            {/* Output beam from hub to dashboard */}
+            {/* Output beam from hub to dashboard + traveling risk pulse */}
             <path
               d="M 120 240 L 235 240"
               stroke="rgba(99, 102, 241, 0.25)"
@@ -314,9 +333,41 @@ export const Scene2RiskRanking: React.FC = () => {
               strokeLinecap="round"
               opacity={boardSpring}
             />
+            {boardSpring > 0.2 && (
+              <circle
+                cx={120 + ((frame * 2.8) % 115)}
+                cy={240}
+                r="5.5"
+                fill="#FB7185"
+                opacity={boardSpring}
+                style={{ filter: "drop-shadow(0 0 10px #F43F5E)" }}
+              />
+            )}
           </svg>
 
-          {/* Glowing Central Engine Hub */}
+          {/* Spinning Orbital Ring + Glowing Central Engine Hub */}
+          <svg
+            width="136"
+            height="136"
+            viewBox="0 0 136 136"
+            style={{
+              position: "absolute",
+              zIndex: 2,
+              transform: `rotate(${frame * 1.4}deg) scale(${hubSpring})`,
+              opacity: 0.72,
+              pointerEvents: "none",
+            }}
+          >
+            <circle
+              cx="68"
+              cy="68"
+              r="60"
+              stroke="url(#flowCyan)"
+              strokeWidth="2"
+              strokeDasharray="18 14"
+              fill="none"
+            />
+          </svg>
           <div
             style={{
               position: "relative",

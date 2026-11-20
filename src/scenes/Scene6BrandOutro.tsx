@@ -81,35 +81,80 @@ export const Scene6BrandOutro: React.FC = () => {
         }}
       />
 
-      {/* Decorative Orbital Precision Ring */}
+      {/* Counter-Rotating Concentric Precision Orbital Rings */}
       <svg
-        width="760"
-        height="760"
-        viewBox="0 0 760 760"
+        width="820"
+        height="820"
+        viewBox="0 0 820 820"
         style={{
           position: "absolute",
-          opacity: 0.22 * sceneIn,
-          transform: `rotate(${frame * 0.18}deg) scale(${haloScale})`,
+          opacity: 0.24 * sceneIn,
+          transform: `rotate(${frame * 0.22}deg) scale(${haloScale})`,
           pointerEvents: "none",
         }}
       >
         <circle
-          cx="380"
-          cy="380"
-          r="330"
+          cx="410"
+          cy="410"
+          r="355"
           stroke="url(#outroRing)"
-          strokeWidth="1.2"
+          strokeWidth="1.4"
           strokeDasharray="10 14"
           fill="none"
         />
         <defs>
-          <linearGradient id="outroRing" x1="0" y1="0" x2="760" y2="760" gradientUnits="userSpaceOnUse">
+          <linearGradient id="outroRing" x1="0" y1="0" x2="820" y2="820" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#6366F1" />
             <stop offset="50%" stopColor="#22D3EE" />
             <stop offset="100%" stopColor="#34D399" />
           </linearGradient>
         </defs>
       </svg>
+      <svg
+        width="640"
+        height="640"
+        viewBox="0 0 640 640"
+        style={{
+          position: "absolute",
+          opacity: 0.16 * sceneIn,
+          transform: `rotate(${-frame * 0.3}deg) scale(${haloScale})`,
+          pointerEvents: "none",
+        }}
+      >
+        <circle
+          cx="320"
+          cy="320"
+          r="270"
+          stroke="#22D3EE"
+          strokeWidth="1"
+          strokeDasharray="4 18"
+          fill="none"
+        />
+      </svg>
+
+      {/* Anamorphic light flare sweep across brand lockup */}
+      <div
+        style={{
+          position: "absolute",
+          top: "42%",
+          left: `${interpolate(frame, [16, 78], [-15, 115], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+            easing: Easing.inOut(Easing.cubic),
+          })}%`,
+          width: 420,
+          height: 6,
+          borderRadius: 999,
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(129,140,248,0.6) 35%, rgba(255,255,255,0.95) 50%, rgba(34,211,238,0.6) 65%, transparent 100%)",
+          opacity: interpolate(frame, [16, 32, 62, 78], [0, 0.85, 0.85, 0], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          }),
+          filter: "blur(8px)",
+          pointerEvents: "none",
+        }}
+      />
 
       {/* Center Lockup */}
       <div

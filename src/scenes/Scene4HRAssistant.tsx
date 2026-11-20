@@ -80,8 +80,37 @@ export const Scene4HRAssistant: React.FC = () => {
     config: { damping: 14, stiffness: 135 },
   });
 
-  // Active pulse on primary action button near end of scene
+  // Active pulse + live automated cursor click on primary action button
   const actionPulse = frame >= 315 ? 0.5 + 0.5 * Math.sin((frame - 315) * 0.22) : 0;
+  const actionClicked = frame >= 352;
+
+  // Animated pointer cursor choreography: enters -> clicks Send (f=142) -> clicks Action chip (f=352)
+  const cursorOpacity = interpolate(frame, [95, 112, 385, 405], [0, 1, 1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const cursorX = interpolate(
+    frame,
+    [95, 134, 165, 315, 348],
+    [1360, 1665, 1665, 620, 355],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+    }
+  );
+  const cursorY = interpolate(
+    frame,
+    [95, 134, 165, 315, 348],
+    [540, 442, 442, 740, 780],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+    }
+  );
+  const cursorScale =
+    (frame >= 138 && frame <= 148) || (frame >= 349 && frame <= 359) ? 0.86 : 1.0;
 
   return (
     <AbsoluteFill
@@ -203,26 +232,34 @@ export const Scene4HRAssistant: React.FC = () => {
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>
-              {["Attendance", "Tasks", "Peer Reviews"].map((src) => (
-                <span
-                  key={src}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "6px 13px",
-                    borderRadius: 999,
-                    background: "rgba(99, 102, 241, 0.14)",
-                    border: "1px solid rgba(129, 140, 248, 0.30)",
-                    fontFamily: FONTS.mono,
-                    fontSize: 13,
-                    color: "#C7D2FE",
-                  }}
-                >
-                  <Database size={13} />
-                  {src}
-                </span>
-              ))}
+              {["Attendance", "Tasks", "Peer Reviews"].map((src, idx) => {
+                const scanLit = isThinking && Math.floor((frame - 148) / 11) >= idx;
+                return (
+                  <span
+                    key={src}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 13px",
+                      borderRadius: 999,
+                      background: scanLit
+                        ? "rgba(34, 211, 238, 0.28)"
+                        : "rgba(99, 102, 241, 0.14)",
+                      border: scanLit
+                        ? "1px solid rgba(34, 211, 238, 0.85)"
+                        : "1px solid rgba(129, 140, 248, 0.30)",
+                      boxShadow: scanLit ? "0 0 18px rgba(34, 211, 238, 0.45)" : "none",
+                      fontFamily: FONTS.mono,
+                      fontSize: 13,
+                      color: scanLit ? "#FFFFFF" : "#C7D2FE",
+                    }}
+                  >
+                    <Database size={13} />
+                    {src}
+                  </span>
+                );
+              })}
             </div>
           </div>
 
@@ -474,17 +511,21 @@ export const Scene4HRAssistant: React.FC = () => {
                     style={{
                       padding: "11px 22px",
                       borderRadius: 12,
-                      background: "linear-gradient(135deg, #6366F1 0%, #06B6D4 100%)",
+                      background: actionClicked
+                        ? "linear-gradient(135deg, #10B981 0%, #059669 100%)"
+                        : "linear-gradient(135deg, #6366F1 0%, #06B6D4 100%)",
                       fontFamily: FONTS.display,
                       fontSize: 16,
                       fontWeight: 700,
                       color: "#FFFFFF",
-                      boxShadow: `0 0 ${18 + actionPulse * 20}px rgba(6, 182, 212, ${
-                        0.45 + actionPulse * 0.35
-                      })`,
+                      boxShadow: actionClicked
+                        ? "0 0 28px rgba(16, 185, 129, 0.65)"
+                        : `0 0 ${18 + actionPulse * 20}px rgba(6, 182, 212, ${
+                            0.45 + actionPulse * 0.35
+                          })`,
                     }}
                   >
-                    ✦ Draft 1:1 Check-In Agenda
+                    {actionClicked ? "✓ 1:1 Check-In Agenda Drafted" : "✦ Draft 1:1 Check-In Agenda"}
                   </div>
                   <div
                     style={{
@@ -520,6 +561,32 @@ export const Scene4HRAssistant: React.FC = () => {
           </div>
         </GlassCard>
       </div>
+
+      {/* Animated Precision UI Pointer Cursor */}
+      {cursorOpacity > 0.01 && (
+        <div
+          style={{
+            position: "absolute",
+            left: cursorX,
+            top: cursorY,
+            opacity: cursorOpacity,
+            transform: `scale(${cursorScale})`,
+            pointerEvents: "none",
+            zIndex: 20,
+            filter: "drop-shadow(0 8px 18px rgba(0, 0, 0, 0.65))",
+          }}
+        >
+          <svg width="34" height="34" viewBox="0 0 28 28" fill="none">
+            <path
+              d="M5 3L23 13.5L14.5 16L11.5 24.5L5 3Z"
+              fill="#FFFFFF"
+              stroke="#0F172A"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      )}
     </AbsoluteFill>
   );
 };

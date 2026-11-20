@@ -146,14 +146,24 @@ def ensure_audio_ready() -> Path:
     return AUDIO_WAV
 
 
+LINUX_GPU_CHROMIUM_FLAGS = (
+    "--ignore-gpu-blocklist "
+    "--enable-gpu-rasterization "
+    "--enable-accelerated-2d-canvas "
+    "--enable-webgl "
+    "--no-sandbox"
+)
+
+
 def select_gpu_chrome_config(
     gpu_name: str | None,
     forced_gl: str | None,
 ) -> tuple[str, str, bool]:
     """
     Returns (chrome_mode, gl_backend, use_xvfb).
-    On Linux with NVIDIA GPU, uses `chrome-for-testing` and probes `remotion gpu`
-    to find the backend that truly reports Hardware Acceleration on the NVIDIA GPU.
+    On Linux with NVIDIA GPU, uses `chrome-for-testing` with `--ignore-gpu-blocklist`
+    (required to unblock datacenter Tesla T4/L4/A100 GPUs in Chrome) and probes
+    `remotion gpu` to find the backend that truly reports Hardware Acceleration.
     """
     is_linux = platform.system().lower() == "linux"
     if not is_linux or not gpu_name:
@@ -182,6 +192,7 @@ def select_gpu_chrome_config(
             "gpu",
             f"--chrome-mode={chrome_mode}",
             f"--gl={gl_opt}",
+            f"--chromium-flags={LINUX_GPU_CHROMIUM_FLAGS}",
             "--enable-multiprocess-on-linux",
         ]
         cmd = (["xvfb-run", "-a", "--server-args=-screen 0 1920x1080x24", *base_cmd] if use_xvfb else base_cmd)
@@ -413,6 +424,8 @@ def main() -> None:
     ]
     if platform.system().lower() == "linux":
         remotion_cmd.append("--enable-multiprocess-on-linux")
+        if gpu_name:
+            remotion_cmd.append(f"--chromium-flags={LINUX_GPU_CHROMIUM_FLAGS}")
     if args.frames:
         remotion_cmd.append(f"--frames={args.frames}")
     if args.concurrency > 0:

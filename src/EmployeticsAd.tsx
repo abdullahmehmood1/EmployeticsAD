@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
 import { Background } from "./components/Background";
 import { CaptionsOverlay } from "./components/CaptionsOverlay";
+import { TransitionFlare } from "./components/TransitionFlare";
 import audioManifestData from "./data/audioManifest.json";
 import { AudioManifest } from "./data/script";
 import { Scene1Resignation } from "./scenes/Scene1Resignation";
@@ -66,6 +67,9 @@ export const EmployeticsAd: React.FC<EmployeticsAdProps> = ({
       <Sequence from={SCENES.scene6.startFrame} durationInFrames={SCENES.scene6.durationFrames}>
         <Scene6BrandOutro />
       </Sequence>
+
+      {/* Anamorphic light-sweep transitions & subtle cinema timeline hairline */}
+      <TransitionFlare />
 
       {/* Optional Broadcast-Grade Synchronized Captions */}
       <CaptionsOverlay manifest={manifest} enabled={showCaptions} />

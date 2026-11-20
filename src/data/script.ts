@@ -29,21 +29,39 @@ export interface AudioManifest {
 
 export const AD_SCRIPT: SceneScript[] = [
   {
-    id: "vo1",
-    startSec: 0.25,
-    endSec: 2.9,
-    text: "Your best employee just quit.",
+    id: "scene1",
+    startSec: 0,
+    endSec: 7,
+    text: "Burnout never announces itself. Late nights, weekend sprints, and rising workloads hide in everyday data until your best people quit.",
   },
   {
-    id: "vo2",
-    startSec: 8.2,
-    endSec: 10.7,
-    text: "Nobody saw it coming.",
+    id: "scene2",
+    startSec: 7,
+    endSec: 15,
+    text: "Meet Employetics — the AI workforce platform that reads daily hours, tasks, and feedback to predict who is heading for burnout.",
   },
   {
-    id: "vo3",
-    startSec: 11.4,
-    endSec: 13.8,
-    text: "Now you can.",
+    id: "scene3",
+    startSec: 15,
+    endSec: 23,
+    text: "It shows managers the real drivers, while giving employees private one-minute check-ins that are never shared with HR.",
+  },
+  {
+    id: "scene4",
+    startSec: 23,
+    endSec: 33,
+    text: "Rebalance workloads in a single click, or ask the AI HR Copilot anything directly from your live team data.",
+  },
+  {
+    id: "scene5",
+    startSec: 33,
+    endSec: 39,
+    text: "Act weeks before the resignation letter — and keep your highest performers healthy and thriving.",
+  },
+  {
+    id: "scene6",
+    startSec: 39,
+    endSec: 45,
+    text: "Employetics. Predict burnout. Keep your people.",
   },
 ];

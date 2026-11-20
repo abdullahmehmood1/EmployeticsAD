@@ -17,6 +17,7 @@ export const RemotionRoot: React.FC = () => {
           showCaptions: false,
           includeAudio: true,
           audioVolume: 1.0,
+          transparentBg: false,
         } satisfies EmployeticsAdProps
       }
     />

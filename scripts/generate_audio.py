@@ -34,7 +34,7 @@ from scipy import signal
 from scipy.io import wavfile
 
 SAMPLE_RATE = 48000
-TOTAL_DURATION = 40.0
+TOTAL_DURATION = 45.0
 TOTAL_SAMPLES = int(TOTAL_DURATION * SAMPLE_RATE)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -43,31 +43,88 @@ MANIFEST_PATH = ROOT_DIR / "src" / "data" / "audioManifest.json"
 
 SCENES = [
     {
-        "id": "vo1",
-        "startSec": 0.18,
-        "endSec": 2.95,
-        "leadIn": 0.05,
-        "tailPad": 0.10,
-        "displayText": "Your best employee just quit.",
-        "ttsText": "Your best employee just quit.",
+        "id": "scene1",
+        "startSec": 0.0,
+        "endSec": 7.0,
+        "leadIn": 0.15,
+        "tailPad": 0.15,
+        "displayText": (
+            "Burnout never announces itself. Late nights, weekend sprints, "
+            "and rising workloads hide in everyday data until your best people quit."
+        ),
+        "ttsText": (
+            "Burnout never announces itself. Late nights, weekend sprints, "
+            "and rising workloads hide in everyday data — until your best people quit."
+        ),
     },
     {
-        "id": "vo2",
-        "startSec": 8.15,
-        "endSec": 10.85,
-        "leadIn": 0.05,
-        "tailPad": 0.10,
-        "displayText": "Nobody saw it coming.",
-        "ttsText": "Nobody saw it coming.",
+        "id": "scene2",
+        "startSec": 7.0,
+        "endSec": 15.0,
+        "leadIn": 0.25,
+        "tailPad": 0.20,
+        "displayText": (
+            "Meet Employetics — the AI workforce platform that reads daily hours, "
+            "tasks, and feedback to predict who is heading for burnout."
+        ),
+        "ttsText": (
+            "Meet Employetics — the AI workforce platform that reads daily hours, "
+            "tasks, and feedback, to predict who is heading for burnout."
+        ),
     },
     {
-        "id": "vo3",
-        "startSec": 11.35,
-        "endSec": 13.85,
-        "leadIn": 0.05,
-        "tailPad": 0.10,
-        "displayText": "Now you can.",
-        "ttsText": "Now you can.",
+        "id": "scene3",
+        "startSec": 15.0,
+        "endSec": 23.0,
+        "leadIn": 0.25,
+        "tailPad": 0.20,
+        "displayText": (
+            "It shows managers the real drivers, while giving employees private "
+            "one-minute check-ins that are never shared with HR."
+        ),
+        "ttsText": (
+            "It shows managers the real drivers, while giving employees private "
+            "one-minute check-ins that are never shared with HR."
+        ),
+    },
+    {
+        "id": "scene4",
+        "startSec": 23.0,
+        "endSec": 33.0,
+        "leadIn": 0.25,
+        "tailPad": 0.25,
+        "displayText": (
+            "Rebalance workloads in a single click, or ask the AI HR Copilot "
+            "anything directly from your live team data."
+        ),
+        "ttsText": (
+            "Rebalance workloads in a single click, or ask the AI HR Copilot "
+            "anything directly from your live team data."
+        ),
+    },
+    {
+        "id": "scene5",
+        "startSec": 33.0,
+        "endSec": 39.0,
+        "leadIn": 0.25,
+        "tailPad": 0.25,
+        "displayText": (
+            "Act weeks before the resignation letter — and keep your highest "
+            "performers healthy and thriving."
+        ),
+        "ttsText": (
+            "Act weeks before the resignation letter — and keep your highest "
+            "performers healthy and thriving."
+        ),
+    },
+    {
+        "id": "scene6",
+        "startSec": 39.0,
+        "endSec": 45.0,
+        "leadIn": 0.30,
+        "tailPad": 0.45,
+        "displayText": "Employetics. Predict burnout. Keep your people.",
+        "ttsText": "Employetics. Predict burnout. Keep your people.",
     },
 ]
 
@@ -524,122 +581,84 @@ def make_mech_click(sr: int, freq: float = 1900.0) -> np.ndarray:
 
 
 def generate_music_and_sfx(sr: int) -> np.ndarray:
-    """Fast trailer-style sound design: deep bass hits, rising 128 BPM synth pulse & crisp sound hits."""
+    """Modern Apple/Stripe-style inspirational tech soundtrack + synchronized UI chimes & whooshes."""
     bed = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
 
-    # 1. Driving 128 BPM Rising Synth Pulse (3.0s -> 34.0s)
-    beat_sec = 60.0 / 128.0
-    step_sec = beat_sec / 2.0  # 8th-note driving pulse
-    t_cur = 3.0
+    chords = [
+        # Scene 1 (0-7s): Warm moody minor tension
+        (0.0, 3.8, [45, 57, 60, 64, 71], 680.0, 0.21),
+        (3.4, 3.9, [45, 53, 60, 64, 69], 780.0, 0.22),
+        # Scene 2 (7-15s): Bright Employetics reveal
+        (6.9, 4.2, [53, 60, 64, 69], 1080.0, 0.24),
+        (10.8, 4.5, [55, 62, 64, 67], 1150.0, 0.24),
+        # Scene 3 (15-23s): Explainable insight + trust
+        (14.9, 4.2, [50, 57, 60, 64], 1060.0, 0.24),
+        (18.8, 4.5, [48, 55, 60, 64, 71], 1180.0, 0.25),
+        # Scene 4 (23-33s): Action & AI Copilot momentum
+        (22.9, 5.2, [53, 60, 64, 69, 76], 1220.0, 0.24),
+        (27.8, 5.4, [55, 62, 67, 71, 74], 1280.0, 0.25),
+        # Scene 5 (33-39s): Outcome & Retention uplift
+        (32.9, 6.2, [53, 60, 64, 67, 74], 1340.0, 0.27),
+        # Scene 6 (39-45s): Warm brand resolve
+        (38.9, 6.1, [48, 55, 60, 64, 67, 72], 1400.0, 0.29),
+    ]
+    for start, dur, notes, cutoff, gain in chords:
+        pad = synthesize_warm_pad(notes, dur, sr, cutoff_hz=cutoff)
+        add_stereo(bed, pad, start, gain=gain)
+
+    # Clean 116 BPM modern SaaS pulse (7.0s -> 39.0s)
+    beat_sec = 60.0 / 116.0
+    t_cursor = 7.0
     step = 0
-    # Tension minor root -> bright confident major lift after 11s
-    while t_cur < 34.0:
-        if t_cur < 11.0:
-            # Building dark tension pulse on D2 (73.4 Hz) -> rising filter brightness!
-            prog = (t_cur - 3.0) / 8.0
-            root_hz = 73.42 if step % 8 < 6 else 87.31
-            cutoff = 360.0 + prog * 1200.0
-            gain = 0.14 + prog * 0.10
-        elif t_cur < 26.0:
-            # Energetic clean trailer tech pulse (D2 -> F2 -> C2 -> G2)
-            bar = int((t_cur - 11.0) / (beat_sec * 4.0)) % 4
-            roots = [73.42, 87.31, 65.41, 98.00]
-            root_hz = roots[bar]
-            cutoff = 1350.0
-            gain = 0.21
-        else:
-            # Confident uplifting solution drive (F2 -> G2 -> A2)
-            bar = int((t_cur - 26.0) / (beat_sec * 4.0)) % 2
-            root_hz = 87.31 if bar == 0 else 98.00
-            cutoff = 1650.0
-            gain = 0.24
-
-        n_p = int(step_sec * 0.92 * sr)
-        tp = np.arange(n_p, dtype=np.float64) / sr
-        # Punchy sawtooth-like bass synth pulse (additive harmonics -> filtered)
-        wave = (
-            0.65 * np.sin(2 * np.pi * root_hz * tp)
-            + 0.35 * np.sin(2 * np.pi * (root_hz * 2.0) * tp)
-            + 0.18 * np.sin(2 * np.pi * (root_hz * 3.0) * tp)
-            + 0.10 * np.sin(2 * np.pi * (root_hz * 4.0) * tp)
-        )
-        sos_p = signal.butter(2, min(cutoff, sr * 0.4), btype="lowpass", fs=sr, output="sos")
-        wave = signal.sosfilt(sos_p, wave)
-        env = np.minimum(1.0, tp / 0.006) * np.exp(-tp * 8.5)
-        pulse = (wave * env).astype(np.float32)
-        pan = -0.18 if step % 2 == 0 else 0.18
-        l_g, r_g = math.sqrt(0.5 * (1.0 - pan)), math.sqrt(0.5 * (1.0 + pan))
-        add_stereo(bed, np.stack([pulse * l_g, pulse * r_g], axis=1), t_cur, gain=gain)
-
-        # Crisp quarter-note trailer kick on beats
-        if step % 2 == 0 and t_cur >= 11.0:
+    arp = [69, 72, 76, 79, 76, 72, 74, 71]
+    while t_cursor < 38.8:
+        note_hz = midi_to_hz(arp[step % len(arp)])
+        pan = -0.3 if step % 2 == 0 else 0.3
+        add_stereo(bed, make_soft_bell(note_hz, 0.22, sr, pan=pan), t_cursor, gain=0.045)
+        if step % 2 == 0:
             n_k = int(0.16 * sr)
             tk = np.arange(n_k) / sr
-            kf = 120.0 * np.exp(-tk * 30.0) + 46.0
-            kick = np.sin(2 * np.pi * np.cumsum(kf) / sr) * np.exp(-tk * 15.0)
-            add_stereo(bed, kick, t_cur, gain=0.22)
-
-        t_cur += step_sec
+            kf = 95.0 * np.exp(-tk * 24.0) + 46.0
+            kick = np.sin(2 * np.pi * np.cumsum(kf) / sr) * np.minimum(1.0, tk / 0.008) * np.exp(-tk * 13.0)
+            add_stereo(bed, kick, t_cursor, gain=0.13)
+        t_cursor += beat_sec / 2.0
         step += 1
 
-    # 2. Atmospheric Sub-Drone & Rising Tension Sweeps
-    add_stereo(bed, synthesize_warm_pad([38, 50, 57], 3.1, sr, cutoff_hz=420.0, attack=0.1, release=0.3), 0.0, gain=0.18)
-    add_stereo(bed, make_synth_riser(3.2, 110.0, 440.0, sr), 7.8, gain=0.16)
-    add_stereo(bed, synthesize_warm_pad([50, 57, 62, 65], 12.2, sr, cutoff_hz=1100.0, attack=0.4, release=0.6), 14.0, gain=0.18)
-    add_stereo(bed, make_synth_riser(2.4, 140.0, 520.0, sr), 31.6, gain=0.17)
-    # Clean resonant resolution chord tail on 34-40s whiteout
-    add_stereo(bed, synthesize_warm_pad([50, 57, 62, 66, 69], 5.6, sr, cutoff_hz=900.0, attack=0.15, release=2.2), 34.1, gain=0.16)
-
-    # 3. Exact Frame-Synced Trailer Sound Hits & FX
+    # Frame-synced UI chimes, transition whooshes, typing clicks & outro chord
     sfx = np.zeros((TOTAL_SAMPLES, 2), dtype=np.float32)
+    # Scene 1 (0-7s): 3 problem card pops + resignation alert
+    add_stereo(sfx, make_soft_bell(523.25, 0.25, sr, pan=-0.35), 0.70, gain=0.08)
+    add_stereo(sfx, make_soft_bell(587.33, 0.25, sr, pan=0.0), 1.63, gain=0.08)
+    add_stereo(sfx, make_soft_bell(659.25, 0.25, sr, pan=0.35), 2.56, gain=0.08)
+    add_stereo(sfx, make_warm_sub(0.95, sr), 4.02, gain=0.18)
+    add_stereo(sfx, make_air_whoosh(0.85, 240.0, 1500.0, sr), 6.55, gain=0.12)
+    # Scene 2 (7-15s): Employetics Engine reveal chime
+    add_stereo(sfx, make_soft_bell(523.25, 0.65, sr, pan=-0.2), 7.15, gain=0.10)
+    add_stereo(sfx, make_soft_bell(783.99, 0.75, sr, pan=0.2), 7.30, gain=0.10)
+    add_stereo(sfx, make_air_whoosh(0.60, 300.0, 1300.0, sr), 14.65, gain=0.10)
+    # Scene 3 (15-23s): Drivers + Employee Private Lock chime
+    add_stereo(sfx, make_soft_bell(659.25, 0.30, sr, pan=0.2), 16.65, gain=0.08)
+    add_stereo(sfx, make_soft_bell(783.99, 0.55, sr, pan=0.0), 19.75, gain=0.11)
+    add_stereo(sfx, make_air_whoosh(0.65, 280.0, 1350.0, sr), 22.65, gain=0.10)
+    # Scene 4 (23-33s): 1-Click Rebalance (24.4s) + Copilot typing & sparkle answer (29.6s)
+    add_stereo(sfx, make_soft_bell(880.00, 0.35, sr, pan=-0.25), 24.40, gain=0.12)
+    add_stereo(sfx, make_air_whoosh(0.75, 320.0, 1450.0, sr), 24.75, gain=0.10)
+    for idx, t_clk in enumerate(np.linspace(27.25, 29.05, 18)):
+        add_stereo(sfx, make_mech_click(sr, freq=1600.0 + (idx % 4) * 140.0), float(t_clk), gain=0.05)
+    add_stereo(sfx, make_soft_bell(987.77, 0.45, sr, pan=0.2), 29.62, gain=0.11)
+    # Scene 5 (33-39s): Healthy & Retained emerald lift
+    add_stereo(sfx, make_air_whoosh(0.80, 260.0, 1400.0, sr), 32.70, gain=0.10)
+    add_stereo(sfx, make_soft_bell(659.25, 0.70, sr, pan=-0.2), 33.40, gain=0.11)
+    add_stereo(sfx, make_soft_bell(1046.50, 0.90, sr, pan=0.2), 33.55, gain=0.11)
+    # Scene 6 (39-45s): Signature Employetics Brand Resolution
+    add_stereo(sfx, make_warm_sub(1.4, sr), 39.10, gain=0.17)
+    add_stereo(sfx, make_soft_bell(523.25, 1.4, sr, pan=-0.25), 39.12, gain=0.12)
+    add_stereo(sfx, make_soft_bell(783.99, 1.6, sr, pan=0.0), 39.24, gain=0.12)
+    add_stereo(sfx, make_soft_bell(1046.50, 1.9, sr, pan=0.25), 39.38, gain=0.11)
 
-    # 0-3s HOOK: Two massive slams
-    add_stereo(sfx, make_trailer_boom(0.85, sr, punch=0.85), 0.16, gain=0.38)    # YOUR BEST EMPLOYEE
-    add_stereo(sfx, make_trailer_boom(1.45, sr, punch=1.20), 1.36, gain=0.52)    # JUST QUIT. (HEAVY IMPACT)
-    add_stereo(sfx, make_air_whoosh(0.32, 350.0, 2200.0, sr), 2.78, gain=0.22)   # Wipe -> Navy
-
-    # 3-11s PROBLEM: 3 heavy slams + battery drain beeps
-    add_stereo(sfx, make_trailer_boom(0.95, sr, punch=0.95), 3.10, gain=0.42)    # LATE NIGHTS.
-    add_stereo(sfx, make_soft_bell(520.0, 0.22, sr, pan=0.4), 3.22, gain=0.12)   # Battery drop 1
-    add_stereo(sfx, make_air_whoosh(0.24, 420.0, 2100.0, sr), 5.45, gain=0.20)
-    add_stereo(sfx, make_trailer_boom(0.95, sr, punch=1.00), 5.60, gain=0.44)    # LOST WEEKENDS.
-    add_stereo(sfx, make_soft_bell(420.0, 0.22, sr, pan=0.4), 5.72, gain=0.12)   # Battery drop 2
-    add_stereo(sfx, make_air_whoosh(0.24, 420.0, 2100.0, sr), 7.95, gain=0.20)
-    add_stereo(sfx, make_trailer_boom(1.30, sr, punch=1.15), 8.10, gain=0.50)    # NOBODY NOTICED.
-    add_stereo(sfx, make_soft_bell(310.0, 0.28, sr, pan=0.4), 8.22, gain=0.14)   # Critical red battery beep
-
-    # 11-14s REVEAL: Bright wipe to white + MEET EMPLOYETICS pop + crisp typing ticks
-    add_stereo(sfx, make_air_whoosh(0.36, 500.0, 3200.0, sr), 10.78, gain=0.26)
-    add_stereo(sfx, make_trailer_boom(0.95, sr, punch=0.90), 11.08, gain=0.38)
-    add_stereo(sfx, make_soft_bell(587.33, 0.65, sr, pan=-0.2), 11.10, gain=0.14)
-    add_stereo(sfx, make_soft_bell(880.00, 0.75, sr, pan=0.2), 11.20, gain=0.14)
-    for idx, t_clk in enumerate(np.linspace(11.75, 13.18, 24)):
-        add_stereo(sfx, make_mech_click(sr, freq=1750.0 + (idx % 4) * 180.0), float(t_clk), gain=0.09)
-
-    # 14-26s APP: Laptop slide & spin swoosh + two crisp callout pop hits
-    add_stereo(sfx, make_air_whoosh(0.75, 280.0, 2400.0, sr), 14.02, gain=0.25)
-    add_stereo(sfx, make_trailer_boom(0.70, sr, punch=0.70), 14.85, gain=0.26)   # Laptop locks straight-on
-    add_stereo(sfx, make_soft_bell(740.0, 0.42, sr, pan=-0.4), 17.20, gain=0.18) # WHO'S AT RISK?
-    add_stereo(sfx, make_air_whoosh(0.30, 500.0, 2000.0, sr), 17.35, gain=0.14)
-    add_stereo(sfx, make_soft_bell(987.77, 0.45, sr, pan=0.4), 20.80, gain=0.18) # AND WHY.
-    add_stereo(sfx, make_air_whoosh(0.30, 500.0, 2000.0, sr), 20.95, gain=0.14)
-
-    # 26-34s SOLUTION: Hard wipe -> battery recharge sweep -> ACT EARLY. -> KEEP YOUR PEOPLE.
-    add_stereo(sfx, make_air_whoosh(0.32, 360.0, 2500.0, sr), 25.75, gain=0.24)
-    add_stereo(sfx, make_trailer_boom(1.05, sr, punch=1.00), 26.80, gain=0.44)   # ACT EARLY.
-    add_stereo(sfx, make_synth_riser(3.4, 220.0, 880.0, sr), 26.50, gain=0.11)   # Battery recharge sweep
-    add_stereo(sfx, make_air_whoosh(0.24, 480.0, 2400.0, sr), 30.08, gain=0.22)
-    add_stereo(sfx, make_trailer_boom(1.30, sr, punch=1.12), 30.20, gain=0.48)   # KEEP YOUR PEOPLE.
-    add_stereo(sfx, make_soft_bell(587.33, 0.90, sr, pan=-0.2), 31.10, gain=0.15)# 100% green battery full chime
-    add_stereo(sfx, make_soft_bell(1174.66, 1.10, sr, pan=0.2), 31.22, gain=0.15)
-
-    # 34-40s WHITEOUT: Collapse snap hit + clean fade out
-    add_stereo(sfx, make_air_whoosh(0.45, 2200.0, 280.0, sr), 34.00, gain=0.26)
-    add_stereo(sfx, make_trailer_boom(1.60, sr, punch=0.95), 34.48, gain=0.40)
-
-    combined = apply_subtle_stereo_reverb(bed + sfx, sr, wet=0.20)
-    fade_n = int(1.6 * sr)
-    fade = np.linspace(1.0, 0.0, fade_n) ** 1.8
+    combined = apply_subtle_stereo_reverb(bed + sfx, sr, wet=0.24)
+    fade_n = int(1.5 * sr)
+    fade = np.linspace(1.0, 0.0, fade_n) ** 1.6
     combined[-fade_n:] *= fade[:, None]
     return combined
 
@@ -953,8 +972,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--edge-voice",
-        default="en-US-BrianMultilingualNeural",
-        help="Deep confident male Microsoft Neural HD voice (default: en-US-BrianMultilingualNeural)",
+        default="en-US-AndrewMultilingualNeural",
+        help="Microsoft Neural HD voice (default: en-US-AndrewMultilingualNeural)",
     )
     parser.add_argument(
         "--kokoro-voice",
@@ -990,8 +1009,8 @@ def main() -> None:
     parser.add_argument(
         "--music-volume",
         type=float,
-        default=0.58,
-        help="Trailer bass hits & rising synth pulse mix level relative to voiceover (default: 0.58)",
+        default=0.38,
+        help="Background soundtrack & SFX mix level relative to voiceover (default: 0.38)",
     )
     args = parser.parse_args()
     asyncio.run(

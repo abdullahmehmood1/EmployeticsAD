@@ -1,20 +1,18 @@
-# Employetics — 40s Bold Kinetic Typography Trailer Ad
+# Employetics — 45s Flagship Product Commercial
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/abdullahmehmood1/EmployeticsAD/blob/main/colab/render_employetics_ad.ipynb)
 
-A **40-second, 16:9, 1080p / 4K @ 60fps** trailer-style bold kinetic-typography commercial for **Employetics** in **Deep Navy (`#0F2A52`)**, **White (`#FFFFFF`)**, **Black (`#000000`)**, and **One Amber Accent (`#F59E0B`)** — zero neon colours, no people, no photos — rendered on **NVIDIA GPU** (PyTorch CUDA Kinetic Motion-Blur + Direct `h264_nvenc`).
+A broadcast-grade **45-second, 1080p / 4K @ 60fps** SaaS product explainer commercial for **Employetics** — built so any first-time viewer immediately understands the entire platform — rendered on **NVIDIA GPU** (PyTorch CUDA Liquid Aurora Shader + Physical Gaussian Optical Bloom + Direct `h264_nvenc` + Broadcast `-14 LUFS` Studio Voiceover).
 
 ---
 
-## Exact Trailer Timeline (`40s @ 60fps = 2,400 frames`)
+## Storyboard & Product Walkthrough (`45s @ 60fps = 2,700 frames`)
 
-| Time | Scene | Visual Motion Graphics |
-| :--- | :--- | :--- |
-| **0–3 s** | `Scene1Hook` | Pure Black screen → white heavy `Montserrat Black` slams: **“YOUR BEST EMPLOYEE”** → **“JUST QUIT.”** with heavy impact screen-shake & sub-bass hit |
-| **3–11 s** | `Scene2Problem` | Deep Navy (`#0F2A52`) → fast kinetic slams: **“LATE NIGHTS.”**, **“LOST WEEKENDS.”**, **“NOBODY NOTICED.”** with corner flat battery draining **Full Green → Empty Red** |
-| **11–14 s** | `Scene3Reveal` | Fast bright wipe to White → elastic bounce **“MEET EMPLOYETICS.”** + typed **“AI THAT SPOTS BURNOUT BEFORE PEOPLE QUIT.”** |
-| **14–26 s** | `Scene4App` | Flat geometric laptop slides in from the right and spins to face camera with a **plain solid navy (`#0F2A52`) 16:9 screen rectangle** ready for screen-recording drop-in + two animated arrow callouts: **“WHO’S AT RISK?”** and **“AND WHY.”** |
-| **26–34 s** | `Scene5Solution` | Flat battery recharges **Red → Full Green** + heavy slams: **“ACT EARLY.”** → **“KEEP YOUR PEOPLE.”** |
-| **34–40 s** | `Scene6Whiteout` | Everything collapses into a **100% pure solid white (`#FFFFFF`) screen** for dropping your logo & slogan in your editor |
-
-**Deep Confident Male Voice-Over:** *“Your best employee just quit. Nobody saw it coming. Now you can.”* paired with deep trailer bass hits & a rising 128 BPM synth pulse.
+| Time | Scene | Voiceover | Visual Motion Graphics |
+| :--- | :--- | :--- | :--- |
+| **0–7 s** | `Scene1Problem` | *"Burnout never announces itself. Late nights, weekend sprints, and rising workloads hide in everyday data until your best people quit."* | 3 staggered telemetry cards (*Late Nights*, *Weekend Sprints*, *115% Workload*) leading to an unexpected resignation alert |
+| **7–15 s** | `Scene2ConnectAndScore` | *"Meet Employetics — the AI workforce platform that reads daily hours, tasks, and feedback to predict who is heading for burnout."* | Animated data streams (*Daily Attendance*, *Sprint Tasks*, *Peer Feedback*) flowing into the **Employetics AI Engine** → live **Real-Time Burnout Risk Ranking** |
+| **15–23 s** | `Scene3ExplainWhy` | *"It shows managers the real drivers, while giving employees private one-minute check-ins that are never shared with HR."* | **91% Burnout Gauge** + manager attribution bars (*Overtime*, *Weekends*, *Feedback*) + employee **1-Minute Private Pulse Check-In (`No HR Access`)** |
+| **23–33 s** | `Scene4TakeAction` | *"Rebalance workloads in a single click, or ask the AI HR Copilot anything directly from your live team data."* | Automated cursor clicks **1-Click Rebalance** (`115% → 86%` with flying task pills) + **AI HR Copilot** answering from live data in `1.1s` |
+| **33–39 s** | `Scene5Outcome` | *"Act weeks before the resignation letter — and keep your highest performers healthy and thriving."* | Burnout risk drops **`91% → 22%`**, team retention **`+34%`**, resignation prevented |
+| **39–45 s** | `Scene6BrandOutro` | *"Employetics. Predict burnout. Keep your people."* | Orbital **Employetics** mark, tagline, 3 capability pills, and `employetics.ai` |

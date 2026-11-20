@@ -1,82 +1,63 @@
-import { loadFont as loadMontserrat } from "@remotion/google-fonts/Montserrat";
+import { loadFont as loadPlusJakarta } from "@remotion/google-fonts/PlusJakartaSans";
 import { loadFont as loadInter } from "@remotion/google-fonts/Inter";
 import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";
 
-const montserrat = loadMontserrat("normal", {
-  weights: ["700", "800", "900"],
+const plusJakarta = loadPlusJakarta("normal", {
+  weights: ["500", "600", "700", "800"],
   subsets: ["latin"],
 });
 
 const inter = loadInter("normal", {
-  weights: ["600", "700", "800"],
+  weights: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
-const mono = loadJetBrainsMono("normal", {
-  weights: ["500", "700"],
+const jetBrainsMono = loadJetBrainsMono("normal", {
+  weights: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
 export const FONTS = {
-  heavy: `${montserrat.fontFamily}, "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif`,
-  sans: `${inter.fontFamily}, "Inter", -apple-system, BlinkMacSystemFont, sans-serif`,
-  mono: `${mono.fontFamily}, "JetBrains Mono", ui-monospace, monospace`,
+  display: `${plusJakarta.fontFamily}, "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif`,
+  body: `${inter.fontFamily}, "Inter", -apple-system, BlinkMacSystemFont, sans-serif`,
+  mono: `${jetBrainsMono.fontFamily}, "JetBrains Mono", ui-monospace, monospace`,
 } as const;
 
 export const VIDEO_CONFIG = {
   width: 1920,
   height: 1080,
   fps: 60,
-  durationSeconds: 40,
-  totalFrames: 40 * 60, // 2400 frames
+  durationSeconds: 45,
+  totalFrames: 45 * 60, // 2700 frames
 } as const;
 
 export const SCENES = {
-  scene1Hook: { id: "scene1", startSec: 0, endSec: 3, startFrame: 0, durationFrames: 180 },
-  scene2Problem: { id: "scene2", startSec: 3, endSec: 11, startFrame: 180, durationFrames: 480 },
-  scene3Reveal: { id: "scene3", startSec: 11, endSec: 14, startFrame: 660, durationFrames: 180 },
-  scene4App: { id: "scene4", startSec: 14, endSec: 26, startFrame: 840, durationFrames: 720 },
-  scene5Solution: { id: "scene5", startSec: 26, endSec: 34, startFrame: 1560, durationFrames: 480 },
-  scene6Whiteout: { id: "scene6", startSec: 34, endSec: 40, startFrame: 2040, durationFrames: 360 },
+  scene1: { id: "scene1", startSec: 0, endSec: 7, startFrame: 0, durationFrames: 420 },
+  scene2: { id: "scene2", startSec: 7, endSec: 15, startFrame: 420, durationFrames: 480 },
+  scene3: { id: "scene3", startSec: 15, endSec: 23, startFrame: 900, durationFrames: 480 },
+  scene4: { id: "scene4", startSec: 23, endSec: 33, startFrame: 1380, durationFrames: 600 },
+  scene5: { id: "scene5", startSec: 33, endSec: 39, startFrame: 1980, durationFrames: 360 },
+  scene6: { id: "scene6", startSec: 39, endSec: 45, startFrame: 2340, durationFrames: 360 },
 } as const;
 
-// Strict Bold Kinetic Typography Palette — NO NEON COLOURS
 export const COLORS = {
-  black: "#000000",
-  navy: "#0F2A52",
-  navyDark: "#0A1D3A",
-  navyMid: "#173B70",
-  white: "#FFFFFF",
+  bgDeep: "#050814",
+  bgSurface: "#0B1120",
+  bgCard: "rgba(15, 23, 42, 0.80)",
+  borderSubtle: "rgba(148, 163, 184, 0.16)",
+
+  textPrimary: "#F8FAFC",
+  textSecondary: "#94A3B8",
+  textMuted: "#64748B",
+
+  indigo: "#6366F1",
+  indigoBright: "#818CF8",
+  cyan: "#06B6D4",
+  cyanBright: "#22D3EE",
+  violet: "#8B5CF6",
+
+  crimson: "#F43F5E",
   amber: "#F59E0B",
-  amberDeep: "#D97706",
-
-  // Flat Battery Status Colors (clean flat vector, no neon)
-  batteryGreen: "#16A34A",
-  batteryAmber: "#F59E0B",
-  batteryRed: "#DC2626",
-
-  // Subtle neutral for flat laptop body bezel
-  slateFrame: "#1E293B",
-  slateBase: "#CBD5E1",
-  slateBaseDark: "#94A3B8",
+  emerald: "#10B981",
+  emeraldBright: "#34D399",
 } as const;
-
-/**
- * Deterministic damped trailer impact screen-shake (zero randomness, zero flicker).
- */
-export function getImpactShake(
-  frame: number,
-  hitFrame: number,
-  amplitude = 14,
-  duration = 18
-): { x: number; y: number; rot: number } {
-  const dt = frame - hitFrame;
-  if (dt < 0 || dt > duration) {
-    return { x: 0, y: 0, rot: 0 };
-  }
-  const decay = Math.exp(-dt * 0.24) * (1 - dt / duration);
-  const x = Math.sin(dt * 2.9) * amplitude * decay;
-  const y = Math.cos(dt * 3.7) * amplitude * 0.8 * decay;
-  const rot = Math.sin(dt * 2.2) * (amplitude * 0.04) * decay;
-  return { x, y, rot };
-}

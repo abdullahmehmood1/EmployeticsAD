@@ -1,20 +1,23 @@
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
+import { Background } from "./components/Background";
 import { CaptionsOverlay } from "./components/CaptionsOverlay";
+import { TransitionFlare } from "./components/TransitionFlare";
 import audioManifestData from "./data/audioManifest.json";
 import { AudioManifest } from "./data/script";
-import { Scene1Hook } from "./scenes/Scene1Hook";
-import { Scene2Problem } from "./scenes/Scene2Problem";
-import { Scene3Reveal } from "./scenes/Scene3Reveal";
-import { Scene4App } from "./scenes/Scene4App";
-import { Scene5Solution } from "./scenes/Scene5Solution";
-import { Scene6Whiteout } from "./scenes/Scene6Whiteout";
+import { Scene1Problem } from "./scenes/Scene1Problem";
+import { Scene2ConnectAndScore } from "./scenes/Scene2ConnectAndScore";
+import { Scene3ExplainWhy } from "./scenes/Scene3ExplainWhy";
+import { Scene4TakeAction } from "./scenes/Scene4TakeAction";
+import { Scene5Outcome } from "./scenes/Scene5Outcome";
+import { Scene6BrandOutro } from "./scenes/Scene6BrandOutro";
 import { COLORS, SCENES } from "./theme";
 
 export interface EmployeticsAdProps {
   showCaptions: boolean;
   includeAudio: boolean;
   audioVolume: number;
+  transparentBg?: boolean;
 }
 
 const manifest = audioManifestData as AudioManifest;
@@ -23,47 +26,54 @@ export const EmployeticsAd: React.FC<EmployeticsAdProps> = ({
   showCaptions = false,
   includeAudio = true,
   audioVolume = 1.0,
+  transparentBg = false,
 }) => {
   const shouldPlayAudio = includeAudio && manifest.hasGeneratedAudio;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.black }}>
-      {/* Master Deep Male Voiceover + Heavy Bass Hits + Rising Synth Pulse */}
+    <AbsoluteFill style={{ backgroundColor: transparentBg ? "transparent" : COLORS.bgDeep }}>
+      {/* Continuous atmospheric backdrop (transparent when PyTorch CUDA GPU Shader composites!) */}
+      <Background transparent={transparentBg} />
+
+      {/* Studio Voiceover + Modern Tech Soundtrack + Synchronized UI SFX */}
       {shouldPlayAudio && (
         <Audio src={staticFile(manifest.masterAudioFile)} volume={audioVolume} />
       )}
 
-      {/* 0–3s (Frames 0–180): HOOK — Black screen, white text slams */}
-      <Sequence from={SCENES.scene1Hook.startFrame} durationInFrames={SCENES.scene1Hook.durationFrames}>
-        <Scene1Hook />
+      {/* 0–7s: The Hidden Burnout Problem */}
+      <Sequence from={SCENES.scene1.startFrame} durationInFrames={SCENES.scene1.durationFrames}>
+        <Scene1Problem />
       </Sequence>
 
-      {/* 3–11s (Frames 180–660): PROBLEM — Navy screen, slams + draining flat battery */}
-      <Sequence from={SCENES.scene2Problem.startFrame} durationInFrames={SCENES.scene2Problem.durationFrames}>
-        <Scene2Problem />
+      {/* 7–15s: Meet Employetics — Connects Everyday Tools & Scores Risk */}
+      <Sequence from={SCENES.scene2.startFrame} durationInFrames={SCENES.scene2.durationFrames}>
+        <Scene2ConnectAndScore />
       </Sequence>
 
-      {/* 11–14s (Frames 660–840): REVEAL — Fast wipe to white, MEET EMPLOYETICS + typing */}
-      <Sequence from={SCENES.scene3Reveal.startFrame} durationInFrames={SCENES.scene3Reveal.durationFrames}>
-        <Scene3Reveal />
+      {/* 15–23s: Explainable AI Drivers + Private 1-Min Employee Check-Ins */}
+      <Sequence from={SCENES.scene3.startFrame} durationInFrames={SCENES.scene3.durationFrames}>
+        <Scene3ExplainWhy />
       </Sequence>
 
-      {/* 14–26s (Frames 840–1560): APP — Flat laptop slides & spins, solid navy screen, 2 callouts */}
-      <Sequence from={SCENES.scene4App.startFrame} durationInFrames={SCENES.scene4App.durationFrames}>
-        <Scene4App />
+      {/* 23–33s: 1-Click Workload Split + AI HR Copilot */}
+      <Sequence from={SCENES.scene4.startFrame} durationInFrames={SCENES.scene4.durationFrames}>
+        <Scene4TakeAction />
       </Sequence>
 
-      {/* 26–34s (Frames 1560–2040): SOLUTION — Recharging battery + ACT EARLY / KEEP YOUR PEOPLE */}
-      <Sequence from={SCENES.scene5Solution.startFrame} durationInFrames={SCENES.scene5Solution.durationFrames}>
-        <Scene5Solution />
+      {/* 33–39s: Outcome — Act Weeks Early & Retain Talent */}
+      <Sequence from={SCENES.scene5.startFrame} durationInFrames={SCENES.scene5.durationFrames}>
+        <Scene5Outcome />
       </Sequence>
 
-      {/* 34–40s (Frames 2040–2400): WHITEOUT — Rapid collapse into 100% solid white screen */}
-      <Sequence from={SCENES.scene6Whiteout.startFrame} durationInFrames={SCENES.scene6Whiteout.durationFrames}>
-        <Scene6Whiteout />
+      {/* 39–45s: Employetics Brand Finale */}
+      <Sequence from={SCENES.scene6.startFrame} durationInFrames={SCENES.scene6.durationFrames}>
+        <Scene6BrandOutro />
       </Sequence>
 
-      {/* Optional Captions (hidden automatically on 34-40s solid white editor plate) */}
+      {/* Optical light-sweep transitions & progress hairline */}
+      <TransitionFlare />
+
+      {/* Optional Broadcast-Grade Synchronized Captions */}
       <CaptionsOverlay manifest={manifest} enabled={showCaptions} />
     </AbsoluteFill>
   );

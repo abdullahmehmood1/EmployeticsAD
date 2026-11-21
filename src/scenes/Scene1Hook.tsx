@@ -1,147 +1,235 @@
 import React from "react";
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { COPY, PALETTE, TIMELINE, VIDEO } from "../timeline";
-import { FitText, SoftPop } from "../lib/FitText";
-import { FLOOR_COLS, FLOOR_ROWS, WORKER_SLOTS } from "../lib/iso";
-import { IsometricOffice } from "../lib/IsometricOffice";
+import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { COPY, PALETTE, TIMELINE, VIDEO, lerpColor } from "../timeline";
+import { FitText } from "../lib/FitText";
+import { INTER_FONT, SERIF_FONT } from "../lib/fonts";
 
 /**
- * S1 HOOK (f0-89): Warm SAND background.
- * Office builds itself: floor tiles pop in with staggered springs, then desks,
- * then 6 workers squash-and-stretch in, then 6 green hearts pop above them.
- * f8: "ONE OF THEM" and f24: "IS ABOUT TO BURN OUT." appear softly at the top.
+ * S1 HOOK (f0-89): MIDNIGHT background.
+ * f8: big DM Serif Display "I'm fine." (CREAM, ~160 px) types on with blinking cursor.
+ * f40, f48, f56: three ghost copies expand outward and softly fade.
+ * f70-89: text shrinks & glides down-right into a TEAL chat bubble as the background warms to DEEP chat screen.
  */
 export const Scene1Hook: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
   const s1 = TIMELINE.S1;
 
-  // Gentle camera drift (soft breathing pan, NO shake)
-  const driftY = Math.sin(frame / 26) * 4;
+  const text = COPY.s1Hook; // "I'm fine."
+  const typeStart = s1.typeStart; // 8
+  const typeEnd = s1.typeEnd; // 35
+  const morphStart = s1.morphStart; // 70
+  const morphEnd = s1.morphEnd; // 89
 
-  const getTileScale = (tx: number, ty: number) => {
-    const delay = s1.tilesStart + (tx + ty) * 2.2 + tx * 0.4;
-    const rel = frame - delay;
-    if (rel < 0) return 0;
-    return spring({
-      frame: rel,
-      fps,
-      config: { damping: 11, stiffness: 190, mass: 0.75 },
-    });
-  };
+  // Characters typed cleanly across f8..35
+  const typedCount =
+    frame < typeStart
+      ? 0
+      : Math.min(
+          text.length,
+          Math.floor(
+            interpolate(frame, [typeStart, typeEnd], [1, text.length + 0.99], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
+          )
+        );
+  const visibleText = text.slice(0, typedCount);
 
-  const getDeskScale = (index: number) => {
-    const delay = s1.desksStart + index * 3.5;
-    const rel = frame - delay;
-    if (rel < 0) return 0;
-    return spring({
-      frame: rel,
-      fps,
-      config: { damping: 10.5, stiffness: 185, mass: 0.8 },
-    });
-  };
+  // Soft blinking caret while typing & briefly after (hides when morph begins)
+  const showCursor = frame >= typeStart && frame < morphStart - 2;
+  const cursorOpacity = showCursor ? (Math.floor((frame - typeStart) / 9) % 2 === 0 ? 0.9 : 0.12) : 0;
 
-  // Squash-and-stretch entrance for each worker (wide squash -> tall stretch -> settle)
-  const getWorkerSquash = (index: number) => {
-    const delay = s1.workersStart + index * 3.8;
-    const rel = frame - delay;
-    if (rel < 0) return { sx: 0, sy: 0 };
-    const spr = spring({
-      frame: rel,
-      fps,
-      config: { damping: 9.5, stiffness: 205, mass: 0.78 },
-    });
-    const squashWave = Math.sin(Math.min(rel, 18) * 0.42) * Math.exp(-rel * 0.16) * 0.22;
-    return {
-      sx: Math.max(0, spr * (1 - squashWave)),
-      sy: Math.max(0, spr * (1 + squashWave * 1.15)),
-    };
-  };
+  // f70-89 morph: big serif line shrinks & moves down-right into a TEAL chat bubble; background -> DEEP
+  const morphP = interpolate(frame, [morphStart, morphEnd], [0, 1], {
+    easing: Easing.inOut(Easing.cubic),
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
-  const getHeartScale = (index: number) => {
-    const delay = s1.heartsStart + index * 3.5;
-    const rel = frame - delay;
-    if (rel < 0) return 0;
-    return spring({
-      frame: rel,
-      fps,
-      config: { damping: 10, stiffness: 210, mass: 0.7 },
-    });
-  };
+  const bgColor = lerpColor(PALETTE.MIDNIGHT, PALETTE.DEEP, morphP);
 
-  const heartLevels = [1, 1, 1, 1, 1, 1];
-  const paperCounts = WORKER_SLOTS.map((w) => w.basePapers);
+  // Gentle slow breathing push-in before morph
+  const breatheScale = interpolate(frame, [0, morphStart], [0.985, 1.02], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
-  // Subtle decorative pastel floating circles in background (strictly SAND/WHITE/SKY tints)
-  const bgShift = interpolate(frame, [0, s1.duration], [0, 18]);
+  // Main line morphs from screen center (540, 860) toward chat bubble zone (780, 1020)
+  const tx = interpolate(morphP, [0, 1], [0, 235]);
+  const ty = interpolate(morphP, [0, 1], [0, 165]);
+  const textScale = interpolate(morphP, [0, 1], [breatheScale, 0.34]);
+  const serifOpacity = interpolate(morphP, [0, 0.72], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Emerging TEAL chat bubble fades in cleanly as the serif text finishes shrinking
+  const bubbleOpacity = interpolate(morphP, [0.35, 0.95], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const bubbleScale = interpolate(morphP, [0.35, 1], [1.22, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Faint chat chrome emerging softly at the very end (f74-89) for seamless handoff to S2
+  const chromeOpacity = interpolate(morphP, [0.45, 1], [0, 0.5], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: PALETTE.SAND, overflow: "hidden" }}>
-      {/* Soft warm floating pastel background accents */}
-      <svg
-        width={VIDEO.width}
-        height={VIDEO.height}
-        viewBox={`0 0 ${VIDEO.width} ${VIDEO.height}`}
-        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-      >
-        <circle cx={145 + bgShift} cy={320} r={88} fill={PALETTE.SAND_LIGHT} opacity={0.75} />
-        <circle cx={930 - bgShift * 0.8} cy={830} r={115} fill={PALETTE.SAND_LIGHT} opacity={0.7} />
-        <circle cx={885} cy={290 + bgShift * 0.5} r={54} fill={PALETTE.SKY_LIGHT} opacity={0.55} />
-      </svg>
+    <AbsoluteFill style={{ backgroundColor: bgColor, overflow: "hidden" }}>
+      {/* Soft emerging chat header divider at end of S1 */}
+      {chromeOpacity > 0.01 && (
+        <div
+          style={{
+            position: "absolute",
+            top: VIDEO.safeTop + 76,
+            left: VIDEO.safeLeft,
+            right: VIDEO.width - VIDEO.safeRight,
+            height: 76,
+            borderBottom: "1px solid rgba(255, 244, 224, 0.14)",
+            display: "flex",
+            alignItems: "center",
+            gap: 18,
+            opacity: chromeOpacity,
+          }}
+        >
+          <div
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: "50%",
+              backgroundColor: PALETTE.BUBBLE,
+            }}
+          />
+          <div
+            style={{
+              width: 148,
+              height: 14,
+              borderRadius: 999,
+              backgroundColor: PALETTE.BUBBLE,
+            }}
+          />
+        </div>
+      )}
 
-      {/* Isometric 3x2 Office building itself piece by piece */}
-      <IsometricOffice
-        frame={frame}
-        originX={462}
-        originY={472 + driftY}
-        scale={1.0}
-        getTileScale={getTileScale}
-        getDeskScale={getDeskScale}
-        getWorkerSquash={getWorkerSquash}
-        getHeartScale={getHeartScale}
-        heartLevels={heartLevels}
-        paperCounts={paperCounts}
-      />
+      {/* Three ghost copies expanding gently outward at f40, f48, f56 */}
+      {s1.ghostFrames.map((gStart, idx) => {
+        const rel = frame - gStart;
+        if (rel < 0 || rel > 36) return null;
+        const p = interpolate(rel, [0, 32], [0, 1], {
+          easing: Easing.out(Easing.cubic),
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        });
+        const gScale = 1 + p * (0.42 + idx * 0.14);
+        const gOpacity = interpolate(rel, [0, 5, 32], [0, 0.34 - idx * 0.05, 0], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        }) * (1 - morphP);
 
-      {/* Safe-margin top headlines (soft bouncy spring pop, NAVY Poppins 900) */}
+        return (
+          <div
+            key={gStart}
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingBottom: 140,
+              pointerEvents: "none",
+              opacity: gOpacity,
+              transform: `scale(${gScale.toFixed(4)})`,
+            }}
+          >
+            <FitText
+              text={text}
+              font="serif"
+              fontSize={160}
+              color={PALETTE.CREAM}
+              maxWidth={VIDEO.maxTextWidth}
+            />
+          </div>
+        );
+      })}
+
+      {/* Center hero serif line "I'm fine." typing on with blinking cursor */}
       <div
         style={{
           position: "absolute",
-          top: VIDEO.safeMargin,
-          left: VIDEO.safeMargin,
-          right: VIDEO.safeMargin,
+          inset: 0,
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          gap: 6,
+          justifyContent: "center",
+          paddingBottom: 140,
+          pointerEvents: "none",
         }}
       >
-        <SoftPop delay={s1.line1In - s1.start}>
-          <FitText
-            text={COPY.s1Line1}
-            fontSize={92}
-            fontWeight={900}
-            color={PALETTE.NAVY}
-            maxWidth={VIDEO.maxTextWidth}
-            letterSpacing={-1.5}
-          />
-        </SoftPop>
-
-        <SoftPop delay={s1.line2In - s1.start}>
-          <FitText
-            text={COPY.s1Line2}
-            fontSize={86}
-            fontWeight={900}
-            color={PALETTE.CORAL}
-            maxWidth={VIDEO.maxTextWidth}
-            letterSpacing={-1.2}
-          />
-        </SoftPop>
+        <div
+          style={{
+            opacity: serifOpacity,
+            transform: `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(${textScale.toFixed(
+              4
+            )})`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: SERIF_FONT,
+              fontSize: 162,
+              lineHeight: 1.05,
+              color: PALETTE.CREAM,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {visibleText}
+          </span>
+          {showCursor && (
+            <span
+              style={{
+                display: "inline-block",
+                width: 6,
+                height: 138,
+                marginLeft: 8,
+                borderRadius: 3,
+                backgroundColor: PALETTE.CREAM,
+                opacity: cursorOpacity,
+              }}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Morph target: emerging TEAL chat bubble down-right */}
+      {bubbleOpacity > 0.01 && (
+        <div
+          style={{
+            position: "absolute",
+            right: VIDEO.width - VIDEO.safeRight,
+            top: 995,
+            opacity: bubbleOpacity,
+            transform: `scale(${bubbleScale.toFixed(4)})`,
+            transformOrigin: "right center",
+            backgroundColor: PALETTE.TEAL,
+            color: PALETTE.MIDNIGHT,
+            fontFamily: INTER_FONT,
+            fontSize: 35,
+            fontWeight: 600,
+            padding: "21px 32px",
+            borderRadius: "28px 28px 8px 28px",
+            boxShadow: "0 10px 26px rgba(6, 15, 31, 0.25)",
+          }}
+        >
+          {COPY.s1Hook}
+        </div>
+      )}
     </AbsoluteFill>
   );
 };
-
-// Keep FLOOR constants referenced cleanly if inspected
-void FLOOR_COLS;
-void FLOOR_ROWS;

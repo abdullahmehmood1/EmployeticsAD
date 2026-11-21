@@ -1,16 +1,15 @@
 {
   "name": "employetics-ad",
-  "version": "2.0.0",
-  "description": "40-second isometric pastel motion-graphics ad for Employetics (AdTwo — Remotion v4, React + TypeScript)",
+  "version": "3.0.0",
+  "description": "40-second vertical intimate night-to-dawn motion-graphics ad for Employetics (AdThree — Remotion v4, React + TypeScript)",
   "private": true,
   "scripts": {
     "sync-assets": "node scripts/sync_assets.mjs",
     "dev": "node scripts/sync_assets.mjs && remotion studio",
-    "still": "node scripts/sync_assets.mjs && remotion still src/index.ts AdTwo",
-    "render": "node scripts/sync_assets.mjs && remotion render src/index.ts AdTwo out/ad2.mp4 --codec=h264 --crf=18 --pixel-format=yuv420p",
+    "still": "node scripts/sync_assets.mjs && remotion still src/index.ts AdThree",
+    "render": "node scripts/sync_assets.mjs && remotion render src/index.ts AdThree out/ad3.mp4 --codec=h264 --crf=18 --pixel-format=yuv420p",
     "build": "tsc --noEmit",
-    "sfx": "python scripts/make_sfx.py && node scripts/sync_assets.mjs",
-    "vo": "python scripts/make_voiceover.py && node scripts/sync_assets.mjs"
+    "sfx": "python scripts/make_sfx.py && node scripts/sync_assets.mjs"
   },
   "dependencies": {
     "@remotion/google-fonts": "^4.0.250",

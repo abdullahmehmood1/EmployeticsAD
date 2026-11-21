@@ -3,403 +3,339 @@ import {
   AbsoluteFill,
   Easing,
   Img,
-  OffthreadVideo,
   interpolate,
   spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import assets from "../lib/assets.json";
-import { Callout } from "../lib/Callout";
-import { POPPINS_FONT } from "../lib/fonts";
-import { WORKER_SLOTS } from "../lib/iso";
-import { IsometricOffice } from "../lib/IsometricOffice";
-import { COPY, PALETTE, SCREEN_TARGETS, TIMELINE, VIDEO } from "../timeline";
+import { COPY, PALETTE, SELF_AWARENESS_TARGETS, TIMELINE, VIDEO } from "../timeline";
+import { AppWindow } from "../lib/AppWindow";
+import { FitText } from "../lib/FitText";
+import { INTER_FONT } from "../lib/fonts";
 
-const WIN_W = 860;
-const WIN_HEADER_H = 42;
-const WIN_CONTENT_H = 538; // 860 x 538 matches 1200 x 750 (1.60:1) cleanly
-const WIN_LEFT = 128; // x = 128..988 (inside 90..990 safe box)
-const WIN_TOP = 200; // y = 200..780
+const WIN_W = 940;
+const WIN_CONTENT_H = 840;
+const IMG_BASE = 940; // 1080x1080 PNG displayed in 940x940 inner box
 
 /**
- * S4 THE APP (f390-659): SKY background.
- * Isometric office shrinks smoothly to bottom-left corner.
- * Floating browser window rises in:
- * - f390-519: public/team_burnout.png, slow Ken Burns zoom (f400-500) onto CORAL risk card;
- *   coral pulsing highlight ring + callout arrow "RED = NEEDS HELP." at f440.
- * - f520-639: swaps to public/workload_optimizer.png (or public/app_demo.mp4 via <OffthreadVideo>);
- *   zooms into utilisation chart & "Optimise Workload" button;
- *   callout "ONE CLICK TO BALANCE." at f560; click ripple pulse on button at f600.
- * - Tiny "DEMO DATA" (40% opacity) bottom-right.
- * - f640-659: browser window slides smoothly away.
+ * S4 THE APP (f420-689): Calm private self-awareness app window (width 940, r=28, 3 dots)
+ * rises smoothly from bottom to center.
+ * - f440: slow zoom to "Pattern Alerts" weekend-work card + pulsing GOLD ring + "It noticed." (f450)
+ * - f540: smooth pan to "Personal Risk Level" gauge + "Before you did." (f550)
+ * - f610: CREAM padlock + "ONLY YOU CAN SEE THIS." (Inter 800, caps, 3px tracking) + zoom toward
+ *         "Visible only to you" subtitle.
+ * - Tiny "DEMO DATA" (40% opacity) bottom-right inside safe area.
+ * - f670-689: window glides calmly back down.
  */
 export const Scene4App: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const s4 = TIMELINE.S4;
-  const globalFrame = s4.start + frame;
 
-  const winIn = s4.windowInStart - s4.start; // 2
-  const z1Start = s4.zoom1Start - s4.start; // 10
-  const z1End = s4.zoom1End - s4.start; // 110
-  const c1At = s4.callout1At - s4.start; // 50
-  const swapAt = s4.swapAt - s4.start; // 130
-  const z2Start = s4.zoom2Start - s4.start; // 135
-  const z2End = s4.zoom2End - s4.start; // 235
-  const c2At = s4.callout2At - s4.start; // 170
-  const clickAt = s4.clickRippleAt - s4.start; // 210
-  const outStart = s4.windowOutStart - s4.start; // 250
-  const outEnd = s4.windowOutEnd - s4.start; // 269
+  const zPattern = s4.zoomPatternStart - s4.start; // 20 (f440)
+  const line1At = s4.line1At - s4.start; // 30 (f450)
+  const panGauge = s4.panGaugeStart - s4.start; // 120 (f540)
+  const line2At = s4.line2At - s4.start; // 130 (f550)
+  const privAt = s4.privateAt - s4.start; // 190 (f610)
+  const downS = s4.windowDownStart - s4.start; // 250 (f670)
+  const downE = s4.windowDownEnd - s4.start; // 269 (f689)
 
-  // Isometric office shrinks smoothly from S3 position into cozy bottom-left corner (f390-415)
-  const shrinkSpr = spring({
+  // Window gentle spring rise from bottom & calm slide-down exit
+  const riseSpr = spring({
     frame,
     fps,
-    config: { damping: 14, stiffness: 150, mass: 0.9 },
+    config: { damping: 16, stiffness: 110, mass: 1.0 },
   });
-  // Gently begins expanding slightly during exit (f645-659) to hand off smoothly to S5
-  const growBack = interpolate(frame, [outStart + 6, outEnd], [0, 0.14], {
-    easing: Easing.inOut(Easing.sin),
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const officeScale = interpolate(shrinkSpr, [0, 1], [0.82, 0.34]) + growBack;
-  const officeOriginX = interpolate(shrinkSpr, [0, 1], [476, 224]);
-  const officeOriginY = interpolate(shrinkSpr, [0, 1], [548, 816]);
-
-  // Browser window rise-in (soft spring) and slide-away (f640-659)
-  const winEnterSpr =
-    frame < winIn
-      ? 0
-      : spring({
-          frame: frame - winIn,
-          fps,
-          config: { damping: 13, stiffness: 150, mass: 0.85 },
-        });
-  const enterY = interpolate(winEnterSpr, [0, 1], [340, 0]);
-  const exitProgress = interpolate(frame, [outStart, outEnd], [0, 1], {
+  const riseY = interpolate(riseSpr, [0, 1], [620, 0]);
+  const exitP = interpolate(frame, [downS, downE], [0, 1], {
     easing: Easing.in(Easing.cubic),
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const exitX = interpolate(exitProgress, [0, 1], [0, 980]);
-  const exitY = interpolate(exitProgress, [0, 1], [0, -140]);
-  const winOpacity =
-    (frame < winIn ? 0 : interpolate(frame - winIn, [0, 7], [0, 1], { extrapolateRight: "clamp" })) *
-    (1 - exitProgress * 0.85);
+  const exitY = interpolate(exitP, [0, 1], [0, 960]);
+  const winOpacity = interpolate(frame, [0, 10], [0, 1], { extrapolateRight: "clamp" }) * (1 - exitP * 0.9);
 
-  // Screen 1: team_burnout.png Ken Burns zoom (f400-500)
-  const { riskCard, zoomOrigin: z1Org, zoomScale: z1Max } = SCREEN_TARGETS.teamBurnout;
-  const zoom1 = interpolate(frame, [z1Start, z1End], [1, z1Max], {
+  // Smooth 3-stop camera choreography on public/self_awareness.png (zero text edge clipping!):
+  // Stop 1 (f440..535): Pattern Alerts card (scale 1.0 -> 1.08, ty = -30)
+  // Stop 2 (f540..605): Personal Risk Level gauge (scale 1.08 -> 1.09, ty = -184)
+  // Stop 3 (f610..670): "Visible only to you" privacy header (scale 1.09 -> 1.24, ty = 0)
+  const p1 = interpolate(frame, [zPattern - 5, zPattern + 24], [0, 1], {
+    easing: Easing.inOut(Easing.cubic),
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const p2 = interpolate(frame, [panGauge - 6, panGauge + 22], [0, 1], {
+    easing: Easing.inOut(Easing.cubic),
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const p3 = interpolate(frame, [privAt - 6, privAt + 22], [0, 1], {
     easing: Easing.inOut(Easing.cubic),
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Screen 2: workload_optimizer.png Ken Burns zoom (f525-625)
-  const { optimiseBtn, zoomOrigin: z2Org, zoomScale: z2Max } = SCREEN_TARGETS.workloadOptimizer;
-  const zoom2 = interpolate(frame, [z2Start, z2End], [1, z2Max], {
-    easing: Easing.inOut(Easing.cubic),
+  // Sequential piecewise blend of scale and vertical pan offset (transformOrigin: "50% 0%")
+  let imgScale = 1.0 + p1 * 0.08;
+  let imgTy = -30 * p1;
+  if (p2 > 0) {
+    imgScale = 1.08 + p2 * 0.01;
+    imgTy = -30 + p2 * (-184 - -30);
+  }
+  if (p3 > 0) {
+    imgScale = 1.09 + p3 * 0.15;
+    imgTy = -184 + p3 * (0 - -184);
+  }
+
+  // Pulsing GOLD ring around Pattern Alerts weekend-work alert box during Stop 1
+  const goldActive = frame >= zPattern && frame < panGauge + 14;
+  const goldFade =
+    interpolate(frame, [zPattern, zPattern + 12], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    }) *
+    interpolate(frame, [panGauge - 4, panGauge + 12], [1, 0], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    });
+  const goldPulse = 0.5 + 0.5 * Math.sin(((frame - zPattern) / 20) * Math.PI * 2);
+
+  // Subtle TEAL highlight around "Visible only to you" privacy pill during Stop 3
+  const privHighlightOp = interpolate(frame, [privAt + 4, privAt + 18], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  const privPulse = 0.5 + 0.5 * Math.sin(((frame - privAt) / 18) * Math.PI * 2);
 
-  // Smooth cross-swap transition at f520 (over 12 frames)
-  const swapProgress = interpolate(frame, [swapAt, swapAt + 12], [0, 1], {
-    easing: Easing.inOut(Easing.cubic),
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  // Three top caption beats cleanly inside y = 255..430 (never overlapping each other!)
+  const op1 =
+    (frame < line1At - 10
+      ? 0
+      : interpolate(frame, [line1At - 10, line1At + 2], [0, 1], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        })) *
+    interpolate(frame, [panGauge - 10, panGauge + 4], [1, 0], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    });
 
-  // Exact canvas coordinates of Screen 1 CORAL risk card (for Callout 1 arrow)
-  const contentTop = WIN_TOP + WIN_HEADER_H + enterY + exitY;
-  const contentLeft = WIN_LEFT + exitX;
+  const op2 =
+    (frame < line2At - 6
+      ? 0
+      : interpolate(frame, [line2At - 6, line2At + 8], [0, 1], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        })) *
+    interpolate(frame, [privAt - 10, privAt + 4], [1, 0], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    });
 
-  const cardUPrime = z1Org.ox + (riskCard.u - z1Org.ox) * zoom1;
-  const cardVPrime = z1Org.oy + (riskCard.v - z1Org.oy) * zoom1;
-  const cardCanvasX = contentLeft + cardUPrime * WIN_W;
-  const cardCanvasY = contentTop + cardVPrime * WIN_CONTENT_H;
-  const cardCanvasH = riskCard.h * WIN_CONTENT_H * zoom1;
+  const op3 =
+    (frame < privAt - 4
+      ? 0
+      : interpolate(frame, [privAt - 4, privAt + 12], [0, 1], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        })) *
+    (1 - exitP);
 
-  // Exact canvas coordinates of Screen 2 "Optimise Workload" button (for Callout 2 arrow)
-  const btnUPrime = z2Org.ox + (optimiseBtn.u - z2Org.ox) * zoom2;
-  const btnVPrime = z2Org.oy + (optimiseBtn.v - z2Org.oy) * zoom2;
-  const btnCanvasX = contentLeft + btnUPrime * WIN_W;
-  const btnCanvasY = contentTop + btnVPrime * WIN_CONTENT_H;
-  const btnCanvasH = optimiseBtn.h * WIN_CONTENT_H * zoom2;
+  const lockScale =
+    frame < privAt - 4
+      ? 0.7
+      : spring({
+          frame: frame - (privAt - 4),
+          fps,
+          config: { damping: 13, stiffness: 165, mass: 0.85 },
+        });
 
-  // Pulsing coral highlight ring on Screen 1 risk card
-  const coralPulse = frame >= c1At ? 0.5 + 0.5 * Math.sin(((frame - c1At) / 18) * Math.PI * 2) : 0;
-
-  // Button pulse & click ripple at f600 on Screen 2 "Optimise Workload" button
-  const btnPulse =
-    frame >= c2At ? 0.5 + 0.5 * Math.sin(((frame - c2At) / 16) * Math.PI * 2) : 0;
-  const clickRel = frame - clickAt;
-  const rippleProgress = interpolate(clickRel, [0, 24], [0, 1], {
-    easing: Easing.out(Easing.cubic),
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const rippleOpacity = interpolate(clickRel, [0, 4, 24], [0, 0.9, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const buttonPressScale =
-    clickRel >= 0 && clickRel < 12
-      ? 1 - Math.sin((clickRel / 12) * Math.PI) * 0.08
-      : 1 + btnPulse * 0.035;
-
-  const heartLevels = [1, 1, 1, 0.24, 1, 1];
-  const paperCounts = WORKER_SLOTS.map((w) => (w.index === 3 ? w.basePapers + 5 : w.basePapers));
-  const coralBeacon = 0.5 + 0.5 * Math.sin((frame / 16) * Math.PI * 2);
+  const { patternAlert, privacyBadge } = SELF_AWARENESS_TARGETS;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: PALETTE.SKY, overflow: "hidden" }}>
-      {/* Soft background circles */}
-      <svg
-        width={VIDEO.width}
-        height={VIDEO.height}
-        viewBox={`0 0 ${VIDEO.width} ${VIDEO.height}`}
-        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-      >
-        <circle cx={930} cy={170} r={120} fill={PALETTE.SKY_LIGHT} opacity={0.85} />
-        <circle cx={140} cy={880} r={140} fill={PALETTE.SKY_LIGHT} opacity={0.8} />
-      </svg>
-
-      {/* Shrunken isometric office nestled gently in the bottom-left corner */}
-      <IsometricOffice
-        frame={globalFrame}
-        originX={officeOriginX}
-        originY={officeOriginY}
-        scale={officeScale}
-        heartLevels={heartLevels}
-        paperCounts={paperCounts}
-        worker3CoralRing={coralBeacon}
-      />
-
-      {/* Floating pastel browser-style window */}
+    <AbsoluteFill style={{ backgroundColor: PALETTE.MIDNIGHT, overflow: "hidden" }}>
+      {/* Top headline stage strictly inside safe area (y = 265..435, x = 110..970) */}
       <div
         style={{
           position: "absolute",
-          left: WIN_LEFT,
-          top: WIN_TOP,
-          width: WIN_W,
-          height: WIN_HEADER_H + WIN_CONTENT_H,
-          borderRadius: 24,
-          backgroundColor: PALETTE.WHITE,
-          border: `3px solid ${PALETTE.WHITE}`,
-          boxShadow: "0 24px 54px rgba(15, 42, 82, 0.16)",
-          overflow: "hidden",
-          opacity: winOpacity,
-          transform: `translate3d(${exitX.toFixed(1)}px, ${(enterY + exitY).toFixed(1)}px, 0)`,
+          top: VIDEO.safeTop + 18,
+          left: VIDEO.safeLeft,
+          right: VIDEO.width - VIDEO.safeRight,
+          height: 170,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {/* Browser window chrome bar with 3 flat pastel dots */}
-        <div
-          style={{
-            height: WIN_HEADER_H,
-            backgroundColor: PALETTE.SKY_LIGHT,
-            borderBottom: `2px solid ${PALETTE.SKY}`,
-            display: "flex",
-            alignItems: "center",
-            padding: "0 18px",
-            gap: 10,
-          }}
-        >
-          <div style={{ width: 13, height: 13, borderRadius: "50%", backgroundColor: PALETTE.CORAL }} />
-          <div style={{ width: 13, height: 13, borderRadius: "50%", backgroundColor: PALETTE.AMBER }} />
-          <div style={{ width: 13, height: 13, borderRadius: "50%", backgroundColor: PALETTE.GREEN }} />
+        {/* Beat 1 (f450): "It noticed." */}
+        {op1 > 0.01 && (
+          <div style={{ position: "absolute", opacity: op1 }}>
+            <FitText
+              text={COPY.s4Line1}
+              font="serif"
+              fontSize={106}
+              color={PALETTE.CREAM}
+              maxWidth={VIDEO.maxTextWidth}
+            />
+          </div>
+        )}
+
+        {/* Beat 2 (f550): "Before you did." */}
+        {op2 > 0.01 && (
+          <div style={{ position: "absolute", opacity: op2 }}>
+            <FitText
+              text={COPY.s4Line2}
+              font="serif"
+              fontSize={100}
+              color={PALETTE.CREAM}
+              maxWidth={VIDEO.maxTextWidth}
+            />
+          </div>
+        )}
+
+        {/* Beat 3 (f610): Simple SVG padlock (CREAM) + "ONLY YOU CAN SEE THIS." (Inter 800, caps, 3px tracking) */}
+        {op3 > 0.01 && (
           <div
             style={{
-              marginLeft: 18,
-              height: 20,
-              width: 340,
-              borderRadius: 10,
-              backgroundColor: PALETTE.WHITE,
-              border: `1.5px solid ${PALETTE.SKY_DEEP}`,
+              position: "absolute",
+              opacity: op3,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 18,
             }}
-          />
-        </div>
-
-        {/* Window viewport */}
-        <div
-          style={{
-            width: WIN_W,
-            height: WIN_CONTENT_H,
-            position: "relative",
-            overflow: "hidden",
-            backgroundColor: PALETTE.SKY_LIGHT,
-          }}
-        >
-          {/* SCREEN 1: public/team_burnout.png */}
-          {swapProgress < 1 && (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: 1 - swapProgress,
-                transform: `scale(${zoom1.toFixed(4)})`,
-                transformOrigin: `${(z1Org.ox * 100).toFixed(1)}% ${(z1Org.oy * 100).toFixed(1)}%`,
-              }}
+          >
+            <svg
+              width={58}
+              height={58}
+              viewBox="0 0 64 64"
+              style={{ transform: `scale(${lockScale.toFixed(4)})`, display: "block" }}
             >
-              <Img
-                src={staticFile("team_burnout.png")}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              <path
+                d="M 20 28 V 20 C 20 12.8 25.4 8 32 8 C 38.6 8 44 12.8 44 20 V 28"
+                fill="none"
+                stroke={PALETTE.CREAM}
+                strokeWidth={5}
+                strokeLinecap="round"
               />
-              {/* Pulsing CORAL highlight ring tightly locked to Alex Rivera's risk card */}
-              {frame >= c1At - 6 && (
+              <rect x={13} y={27} width={38} height={29} rx={8} fill={PALETTE.CREAM} />
+              <circle cx={32} cy={40} r={4} fill={PALETTE.MIDNIGHT} />
+              <rect x={30.3} y={42} width={3.4} height={7} rx={1.5} fill={PALETTE.MIDNIGHT} />
+            </svg>
+            <FitText
+              text={COPY.s4Private}
+              font="sans"
+              fontSize={44}
+              fontWeight={800}
+              color={PALETTE.CREAM}
+              maxWidth={VIDEO.maxTextWidth}
+              letterSpacing={3}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Centered Rounded App Window (width 940, y = 472..1356, well inside safe zone!) */}
+      <div
+        style={{
+          position: "absolute",
+          top: 472,
+          left: (VIDEO.width - WIN_W) / 2,
+          opacity: winOpacity,
+          transform: `translate3d(0, ${(riseY + exitY).toFixed(1)}px, 0)`,
+        }}
+      >
+        <AppWindow width={WIN_W} contentHeight={WIN_CONTENT_H}>
+          <div
+            style={{
+              width: IMG_BASE,
+              height: IMG_BASE,
+              position: "relative",
+              transform: `translate3d(0, ${imgTy.toFixed(1)}px, 0) scale(${imgScale.toFixed(4)})`,
+              transformOrigin: "50% 0%",
+            }}
+          >
+            <Img
+              src={staticFile("self_awareness.png")}
+              style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }}
+            />
+
+            {/* Pulsing GOLD highlight ring around "Pattern Alerts" weekend-work alert */}
+            {goldActive && goldFade > 0.01 && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: `${((patternAlert.u - patternAlert.w / 2) * 100).toFixed(2)}%`,
+                  top: `${((patternAlert.v - patternAlert.h / 2) * 100).toFixed(2)}%`,
+                  width: `${(patternAlert.w * 100).toFixed(2)}%`,
+                  height: `${(patternAlert.h * 100).toFixed(2)}%`,
+                  borderRadius: 18,
+                  border: `4px solid ${PALETTE.GOLD}`,
+                  boxShadow: `0 0 0 ${(5 + goldPulse * 11).toFixed(1)}px rgba(240, 182, 90, ${(
+                    (0.42 - goldPulse * 0.2) *
+                    goldFade
+                  ).toFixed(2)})`,
+                  opacity: goldFade,
+                  boxSizing: "border-box",
+                  pointerEvents: "none",
+                }}
+              />
+            )}
+
+            {/* Pulsing soft CREAM/TEAL ring around "Visible only to you" subtitle pill */}
+            {privHighlightOp > 0.01 && (
+              <>
                 <div
                   style={{
                     position: "absolute",
-                    left: `${((riskCard.u - riskCard.w / 2) * 100).toFixed(3)}%`,
-                    top: `${((riskCard.v - riskCard.h / 2) * 100).toFixed(3)}%`,
-                    width: `${(riskCard.w * 100).toFixed(3)}%`,
-                    height: `${(riskCard.h * 100).toFixed(3)}%`,
-                    borderRadius: 16,
-                    border: `4px solid ${PALETTE.CORAL}`,
-                    boxShadow: `0 0 0 ${(4 + coralPulse * 9).toFixed(1)}px rgba(217, 105, 79, ${(
-                      0.45 -
-                      coralPulse * 0.25
+                    left: `${((privacyBadge.u - privacyBadge.w / 2) * 100).toFixed(2)}%`,
+                    top: `${((privacyBadge.v - privacyBadge.h / 2) * 100).toFixed(2)}%`,
+                    width: `${(privacyBadge.w * 100).toFixed(2)}%`,
+                    height: `${(privacyBadge.h * 100).toFixed(2)}%`,
+                    borderRadius: 999,
+                    border: `3.5px solid ${PALETTE.CREAM}`,
+                    boxShadow: `0 0 0 ${(4 + privPulse * 8).toFixed(1)}px rgba(95, 168, 160, ${(
+                      (0.5 - privPulse * 0.22) *
+                      privHighlightOp
                     ).toFixed(2)})`,
+                    opacity: privHighlightOp,
                     boxSizing: "border-box",
                     pointerEvents: "none",
                   }}
                 />
-              )}
-            </div>
-          )}
-
-          {/* SCREEN 2: public/workload_optimizer.png (or public/app_demo.mp4 if supplied) */}
-          {swapProgress > 0 && (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: swapProgress,
-                transform: assets.hasAppDemoVideo ? undefined : `scale(${zoom2.toFixed(4)})`,
-                transformOrigin: `${(z2Org.ox * 100).toFixed(1)}% ${(z2Org.oy * 100).toFixed(1)}%`,
-              }}
-            >
-              {assets.hasAppDemoVideo ? (
-                <OffthreadVideo
-                  src={staticFile("app_demo.mp4")}
-                  muted
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                {/* Soft midnight focus veil over lower cards during privacy zoom */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: "18%",
+                    bottom: 0,
+                    background: `linear-gradient(180deg, rgba(11,27,51,0) 0%, rgba(11,27,51,${(
+                      0.62 * privHighlightOp
+                    ).toFixed(2)}) 45%, rgba(11,27,51,${(0.82 * privHighlightOp).toFixed(2)}) 100%)`,
+                    pointerEvents: "none",
+                  }}
                 />
-              ) : (
-                <>
-                  <Img
-                    src={staticFile("workload_optimizer.png")}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  />
-                  {/* Pulsing highlight & f600 click ripple locked onto "Optimise Workload" button */}
-                  {frame >= c2At - 6 && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: `${((optimiseBtn.u - optimiseBtn.w / 2) * 100).toFixed(3)}%`,
-                        top: `${((optimiseBtn.v - optimiseBtn.h / 2) * 100).toFixed(3)}%`,
-                        width: `${(optimiseBtn.w * 100).toFixed(3)}%`,
-                        height: `${(optimiseBtn.h * 100).toFixed(3)}%`,
-                        borderRadius: 14,
-                        border: `4px solid ${PALETTE.NAVY}`,
-                        boxShadow: `0 0 0 ${(3 + btnPulse * 7).toFixed(1)}px rgba(79, 158, 122, 0.55)`,
-                        transform: `scale(${buttonPressScale.toFixed(4)})`,
-                        boxSizing: "border-box",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      {/* Expanding concentric click ripple at f600 */}
-                      {clickRel >= 0 && rippleOpacity > 0.01 && (
-                        <svg
-                          width="100%"
-                          height="100%"
-                          viewBox="0 0 200 60"
-                          style={{ position: "absolute", inset: 0, overflow: "visible" }}
-                        >
-                          <circle
-                            cx={100}
-                            cy={30}
-                            r={14 + rippleProgress * 95}
-                            fill="none"
-                            stroke={PALETTE.WHITE}
-                            strokeWidth={6}
-                            strokeOpacity={rippleOpacity}
-                          />
-                          <circle
-                            cx={100}
-                            cy={30}
-                            r={10 + rippleProgress * 62}
-                            fill="none"
-                            stroke={PALETTE.GREEN}
-                            strokeWidth={4}
-                            strokeOpacity={rippleOpacity}
-                          />
-                        </svg>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </div>
+              </>
+            )}
+          </div>
+        </AppWindow>
       </div>
 
-      {/* Callout 1 (f440): "RED = NEEDS HELP." pointing cleanly down at CORAL risk card */}
-      <Callout
-        startFrame={c1At}
-        endFrame={swapAt + 4}
-        label={COPY.s4Callout1}
-        labelX={540}
-        labelY={134}
-        labelMaxWidth={620}
-        labelFontSize={44}
-        labelColor={PALETTE.NAVY}
-        pillBg={PALETTE.WHITE}
-        arrowColor={PALETTE.CORAL}
-        fromX={485}
-        fromY={172}
-        ctrlX={445}
-        ctrlY={235}
-        toX={cardCanvasX + 8}
-        toY={cardCanvasY - cardCanvasH / 2 - 6}
-      />
-
-      {/* Callout 2 (f560): "ONE CLICK TO BALANCE." pointing cleanly up at "Optimise Workload" button */}
-      <Callout
-        startFrame={c2At}
-        endFrame={outStart + 6}
-        label={COPY.s4Callout2}
-        labelX={695}
-        labelY={862}
-        labelMaxWidth={540}
-        labelFontSize={38}
-        labelColor={PALETTE.NAVY}
-        pillBg={PALETTE.WHITE}
-        arrowColor={PALETTE.GREEN}
-        fromX={770}
-        fromY={826}
-        ctrlX={818}
-        ctrlY={796}
-        toX={btnCanvasX - 10}
-        toY={btnCanvasY + btnCanvasH / 2 + 6}
-      />
-
-      {/* Tiny "DEMO DATA" bottom-right (40% opacity, inside 90 px safe margin) */}
+      {/* Tiny "DEMO DATA" (40% opacity) bottom-right inside social-safe area (y<=1500, x<=970) */}
       <div
         style={{
           position: "absolute",
-          right: VIDEO.safeMargin,
-          bottom: VIDEO.safeMargin,
-          fontFamily: POPPINS_FONT,
-          fontSize: 16,
-          fontWeight: 700,
-          letterSpacing: "2px",
-          color: PALETTE.NAVY,
-          opacity: 0.4,
+          right: VIDEO.width - VIDEO.safeRight,
+          top: VIDEO.safeBottom - 36,
+          fontFamily: INTER_FONT,
+          fontSize: 18,
+          fontWeight: 600,
+          letterSpacing: "2.5px",
+          color: PALETTE.CREAM,
+          opacity: 0.4 * (1 - exitP),
         }}
       >
         {COPY.s4DemoData}

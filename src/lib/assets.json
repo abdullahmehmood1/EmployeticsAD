@@ -1,17 +1,13 @@
 {
-  "hasAppDemoVideo": false,
-  "hasTeamBurnoutScreen": true,
-  "hasWorkloadOptimizerScreen": true,
-  "hasCustomVoiceover": false,
+  "hasSelfAwarenessScreen": true,
   "hasCustomMusic": false,
-  "voClips": [],
   "sfx": {
-    "pop": true,
-    "whoosh": true,
-    "ding": true,
-    "thud": true,
-    "sparkle": true,
-    "click": true,
-    "music_loop": true
+    "msg_pop": true,
+    "msg_sent": true,
+    "typing_tick": true,
+    "whoosh_soft": true,
+    "chime": true,
+    "heartbeat": true,
+    "music": true
   }
 }

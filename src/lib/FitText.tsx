@@ -1,15 +1,17 @@
 import React, { useMemo } from "react";
-import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { VIDEO } from "../timeline";
-import { POPPINS_FONT } from "./fonts";
+import { INTER_FONT, POPPINS_FONT, SERIF_FONT } from "./fonts";
+
+export type FontKind = "serif" | "sans" | "brand";
 
 export interface FitTextProps {
   text: string;
   children?: React.ReactNode;
+  font?: FontKind;
   fontSize: number;
-  fontWeight?: 400 | 500 | 700 | 800 | 900;
+  fontWeight?: 400 | 500 | 600 | 800;
   color: string;
-  /** Maximum allowed line width in px (defaults to square safe width 900 px). */
+  /** Maximum width in px (defaults to vertical social-safe width 860 px). */
   maxWidth?: number;
   letterSpacing?: number;
   lineHeight?: number;
@@ -17,60 +19,68 @@ export interface FitTextProps {
   style?: React.CSSProperties;
 }
 
+const FONT_MAP: Record<FontKind, string> = {
+  serif: SERIF_FONT,
+  sans: INTER_FONT,
+  brand: POPPINS_FONT,
+};
+
 let measureCanvas: HTMLCanvasElement | null = null;
 
-function measureLineWidthPx(
+function measureWidth(
   text: string,
+  fontFamily: string,
   fontSize: number,
   fontWeight: number,
   letterSpacing: number
 ): number {
   if (!text) return 0;
-  const extraTracking = Math.max(0, text.length - 1) * letterSpacing;
-
+  const tracking = Math.max(0, text.length - 1) * letterSpacing;
   if (typeof document !== "undefined") {
     if (!measureCanvas) {
       measureCanvas = document.createElement("canvas");
     }
     const ctx = measureCanvas.getContext("2d");
     if (ctx) {
-      ctx.font = `${fontWeight} ${fontSize}px ${POPPINS_FONT}`;
-      return ctx.measureText(text).width + extraTracking;
+      ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+      return ctx.measureText(text).width + tracking;
     }
   }
-
-  return text.length * fontSize * 0.62 + extraTracking;
+  return text.length * fontSize * 0.56 + tracking;
 }
 
 /**
- * Single-line typography helper that auto-shrinks fontSize so any line fits cleanly
- * inside `maxWidth` (default 900 px for 1080x1080 square with 90 px safe margin).
+ * Single-line text helper that deterministically shrinks fontSize so any line stays
+ * cleanly inside the vertical 9:16 social-safe width (860 px: x = 110..970).
  */
 export const FitText: React.FC<FitTextProps> = ({
   text,
   children,
+  font = "serif",
   fontSize,
-  fontWeight = 900,
+  fontWeight = 400,
   color,
   maxWidth = VIDEO.maxTextWidth,
   letterSpacing = 0,
-  lineHeight = 1.06,
+  lineHeight = 1.12,
   align = "center",
   style,
 }) => {
+  const fontFamily = FONT_MAP[font];
+
   const fittedSize = useMemo(() => {
-    const measured = measureLineWidthPx(text, fontSize, fontWeight, letterSpacing);
+    const measured = measureWidth(text, fontFamily, fontSize, fontWeight, letterSpacing);
     const budget = maxWidth * 0.985;
     if (measured <= budget || measured <= 0) {
       return fontSize;
     }
     return Math.floor(fontSize * (budget / measured) * 10) / 10;
-  }, [text, fontSize, fontWeight, letterSpacing, maxWidth]);
+  }, [text, fontFamily, fontSize, fontWeight, letterSpacing, maxWidth]);
 
   return (
     <div
       style={{
-        fontFamily: POPPINS_FONT,
+        fontFamily,
         fontSize: fittedSize,
         fontWeight,
         color,
@@ -83,52 +93,6 @@ export const FitText: React.FC<FitTextProps> = ({
       }}
     >
       {children ?? text}
-    </div>
-  );
-};
-
-export interface SoftPopProps {
-  /** Local frame when line gently pops in (scale 0.6 -> 1.05 -> 1, soft bouncy spring). */
-  delay?: number;
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-}
-
-/**
- * Friendly bouncy pop entrance (NO slams, NO shake): soft spring with subtle overshoot
- * (scale 0.6 -> ~1.05 -> 1).
- */
-export const SoftPop: React.FC<SoftPopProps> = ({ delay = 0, children, style }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const rel = frame - delay;
-
-  if (rel < 0) {
-    return <div style={{ opacity: 0, ...style }}>{children}</div>;
-  }
-
-  const spr = spring({
-    frame: rel,
-    fps,
-    config: { damping: 11, stiffness: 165, mass: 0.85 },
-  });
-  const scale = interpolate(spr, [0, 1], [0.6, 1]);
-  const translateY = interpolate(spr, [0, 1], [18, 0]);
-  const opacity = interpolate(rel, [0, 4], [0.45, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  return (
-    <div
-      style={{
-        opacity,
-        transform: `translateY(${translateY.toFixed(2)}px) scale(${scale.toFixed(4)})`,
-        transformOrigin: "center center",
-        ...style,
-      }}
-    >
-      {children}
     </div>
   );
 };

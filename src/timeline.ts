@@ -1,85 +1,74 @@
 /**
- * Single source of truth for Employetics AdTwo (1080x1080 square, 30 fps, 1200 frames = 40.0 s).
- * Edit any text or frame number here to update visuals, motion, and synced audio together.
+ * Single source of truth for Employetics AdThree (1080x1920 vertical 9:16, 30 fps, 1200 frames = 40.0 s).
+ * Edit any text or frame timing here to update visuals, motion, and synced sound effects together.
  */
 
 export const VIDEO = {
-  id: "AdTwo",
+  id: "AdThree",
   width: 1080,
-  height: 1080,
+  height: 1920,
   fps: 30,
   durationInFrames: 1200,
-  safeMargin: 90,
-  maxTextWidth: 900, // 1080 - 2 * 90
+  // Strict social-app safe zone (clear of TikTok/Reels/Shorts chrome)
+  safeLeft: 110,
+  safeRight: 970,
+  safeTop: 250,
+  safeBottom: 1500,
+  maxTextWidth: 860, // 970 - 110
 } as const;
 
-/**
- * Strict daytime pastel palette — NO neon, NO black (#000000).
- * Lighter/darker tints of these 8 core colors are used for isometric shading.
- */
+/** Strict emotional night-to-dawn palette (NO neon). */
 export const PALETTE = {
-  SKY: "#DCEBF7",
-  SKY_LIGHT: "#EDF5FC",
-  SKY_DEEP: "#BBD6EC",
-
-  SAND: "#F4EAD7",
-  SAND_LIGHT: "#FAF3E6",
-  SAND_TILE_A: "#F7EFE0",
-  SAND_TILE_B: "#ECE0C8",
-  SAND_SHADE_L: "#DFCFAF",
-  SAND_SHADE_R: "#CEBA94",
-
-  WHITE: "#FFFFFF",
-
+  MIDNIGHT: "#0B1B33",
+  NIGHT_DARK: "#060F1F",
+  DEEP: "#14284A",
+  BUBBLE: "#263A5C",
+  CREAM: "#FFF4E0",
+  TEAL: "#5FA8A0",
+  GOLD: "#F0B65A",
   NAVY: "#0F2A52",
-  NAVY_MID: "#224273",
-  NAVY_LIGHT: "#3A5B8C",
-
-  SLATE: "#5B6B82",
-  SLATE_LIGHT: "#8A99AE",
-  SLATE_PALE: "#CFD8E4",
-  SLATE_DARK: "#435268",
-
-  GREEN: "#4F9E7A",
-  GREEN_LIGHT: "#76BA9A",
-  GREEN_DARK: "#3B7E5F",
-  GREEN_SOFT: "#D6EDE2",
-
-  AMBER: "#E3A64B",
-  AMBER_LIGHT: "#F0C37C",
-  AMBER_DARK: "#C4882E",
-  AMBER_SOFT: "#FBEED7",
-
-  CORAL: "#D9694F",
-  CORAL_LIGHT: "#E9907B",
-  CORAL_DARK: "#B94E35",
-  CORAL_SOFT: "#FADFD8",
+  AMBER: "#E3A64B", // Low battery (<20%) only
 } as const;
 
-/** Allowed on-screen copy (ONLY these strings appear in the ad). */
+/** Allowed on-screen copy (ONLY these strings appear in AdThree). */
 export const COPY = {
   // S1 HOOK
-  s1Line1: "ONE OF THEM",
-  s1Line2: "IS ABOUT TO BURN OUT.",
+  s1Hook: "I'm fine.",
 
-  // S2 PUZZLE
-  s2PromptStem: "CAN YOU TELL WHO",
-  s2QuestionMark: "?",
-  s2PromptFull: "CAN YOU TELL WHO?",
+  // Day chips
+  dayMon: "MON",
+  dayWed: "WED",
+  daySat: "SAT",
+  daySun: "SUN",
 
-  // S3 REVEAL
-  s3Brand: "EMPLOYETICS",
-  s3Sub: "SEES BURNOUT FIRST.",
-  s3Alert: "!",
+  // Status bar times
+  timeMon: "9:02 PM",
+  timeWed: "11:48 PM",
+  timeSat: "10:15 PM",
+  timeSun: "9:00 AM",
+
+  // Exact chat bubbles
+  chatMonFriend: "How are you?",
+  chatMonSara: "I'm fine.",
+  chatWedFriend: "Dinner tonight?",
+  chatWedSara: "Can't. Work. I'm fine.",
+  chatSatFriend: "Are you OK?",
+  chatSatSara: "I'm fine.",
+  chatSunSara: "Honestly? I'm tired.",
+  chatSunFriend: "I'm coming over.",
+
+  // S3 THE TURN
+  s3Question: "But are you?",
 
   // S4 THE APP
-  s4Callout1: "RED = NEEDS HELP.",
-  s4Callout2: "ONE CLICK TO BALANCE.",
+  s4Line1: "It noticed.",
+  s4Line2: "Before you did.",
+  s4Private: "ONLY YOU CAN SEE THIS.",
   s4DemoData: "DEMO DATA",
 
-  // S5 THE FIX
-  s5Line1: "BALANCE THE WORK.",
-  s5Line2: "BEFORE BURNOUT.",
+  // S5 THE CHANGE
+  s5Line1: "NOTICE YOURSELF.",
+  s5Line2: "BEFORE BURNOUT NOTICES YOU.",
 
   // S6 END CARD
   s6WordmarkBold: "Employ",
@@ -94,81 +83,79 @@ export const TIMELINE = {
     start: 0,
     end: 89,
     duration: 90,
-    tilesStart: 0,
-    desksStart: 16,
-    workersStart: 28,
-    heartsStart: 42,
-    line1In: 8,
-    line2In: 24,
+    typeStart: 8,
+    typeEnd: 35,
+    ghostFrames: [40, 48, 56] as readonly number[],
+    morphStart: 70,
+    morphEnd: 89,
   },
 
-  // S2 THE PUZZLE: f90-299 (210 frames)
+  // S2 THE WEEK: f90-329 (240 frames)
   S2: {
     start: 90,
-    end: 299,
-    duration: 210,
-    titleIn: 100,
-    drainStart: 120,
-    drainEnd: 260,
-    paperStackFrames: [130, 155, 180, 205, 230] as readonly number[],
-    sweepStart: 285,
-    sweepEnd: 299,
+    end: 329,
+    duration: 240,
+    monStart: 90,
+    monFriend: 95,
+    monTypingStart: 115,
+    monTypingEnd: 128,
+    monSara: 130,
+
+    wedStart: 170,
+    wedFriend: 175,
+    wedSara: 205,
+
+    satStart: 250,
+    satFriend: 255,
+    satTypingStart: 275,
+    satTypingEnd: 300,
+    satSara: 305,
   },
 
-  // S3 REVEAL: f300-389 (90 frames)
+  // S3 THE TURN: f330-419 (90 frames)
   S3: {
-    start: 300,
-    end: 389,
+    start: 330,
+    end: 419,
     duration: 90,
-    cardStart: 304,
-    scanStart: 320,
-    scanHitWorker3: 339,
-    scanEnd: 368,
-    subIn: 336,
+    textFadeIn: 340,
+    textFull: 364,
+    fadeOutStart: 405,
+    fadeOutEnd: 419,
   },
 
-  // S4 THE APP: f390-659 (270 frames)
+  // S4 THE APP: f420-689 (270 frames)
   S4: {
-    start: 390,
-    end: 659,
+    start: 420,
+    end: 689,
     duration: 270,
-    windowInStart: 392,
-    zoom1Start: 400,
-    zoom1End: 500,
-    callout1At: 438,
-    swapAt: 520,
-    zoom2Start: 525,
-    zoom2End: 625,
-    callout2At: 552,
-    clickRippleAt: 600,
-    windowOutStart: 640,
-    windowOutEnd: 659,
+    windowRiseStart: 420,
+    zoomPatternStart: 440,
+    line1At: 450,
+    panGaugeStart: 540,
+    line2At: 550,
+    privateAt: 610,
+    windowDownStart: 670,
+    windowDownEnd: 689,
   },
 
-  // S5 THE FIX: f660-1019 (360 frames)
+  // S5 THE CHANGE: f690-1019 (330 frames)
   S5: {
-    start: 660,
+    start: 690,
     end: 1019,
-    duration: 360,
-    flyStart: 680,
-    flyEnd: 760,
-    blockFlights: [
-      { depart: 680, land: 706 },
-      { depart: 693, land: 719 },
-      { depart: 706, land: 732 },
-      { depart: 719, land: 745 },
-      { depart: 732, land: 758 },
-    ] as readonly { depart: number; land: number }[],
-    line1In: 700,
-    refillStart: 760,
-    refillEnd: 840,
-    line2In: 780,
-    underlineStart: 792,
-    underlineEnd: 822,
-    celebrateStart: 850,
-    celebrateEnd: 900,
-    shrinkStart: 1000,
-    shrinkEnd: 1019,
+    duration: 330,
+    dawnStart: 700,
+    dawnEnd: 860,
+    saraBubble: 720,
+    friendBubble: 770,
+    chargeStart: 780,
+    chargeEnd: 850,
+    chimeAt: 850,
+    chatFadeOutStart: 874,
+    chatFadeOutEnd: 890,
+    line1At: 890,
+    line2At: 950,
+    endFadeStart: 1000,
+    endFadeEnd: 1019,
   },
 
   // S6 END CARD: f1020-1199 (180 frames = 6.0 s)
@@ -176,60 +163,55 @@ export const TIMELINE = {
     start: 1020,
     end: 1199,
     duration: 180,
-    logoStart: 1025,
-    logoEnd: 1050,
-    wordmarkStart: 1045,
-    wordmarkEnd: 1070,
-    sloganStart: 1080,
-    sloganEnd: 1100,
+    logoStart: 1030,
+    logoEnd: 1060,
+    wordmarkStart: 1050,
+    wordmarkEnd: 1075,
+    sloganStart: 1085,
+    sloganEnd: 1105,
   },
 
-  // Audio cue points
+  // Audio cue points (NO voice-over — intimate piano + subtle UI sounds only)
   AUDIO: {
-    popFrames: [6, 14, 22, 30, 38, 46, 54, 100, 146, 196, 246, 340, 440, 560, 700, 780] as readonly number[],
-    whooshFrames: [285, 392, 520, 640, 1000] as readonly number[],
-    dingFrames: [342, 838, 1030] as readonly number[],
-    thudFrames: [706, 719, 732, 745, 758] as readonly number[],
-    sparkleFrames: [795, 850] as readonly number[],
-    clickFrame: 600,
-    musicVolume: 0.18,
-    musicFadeOutStart: 1170,
-    voClips: [
-      { from: 12, file: "vo_12.mp3", text: "One of them is about to burn out." },
-      { from: 110, file: "vo_110.mp3", text: "Can you tell which one?" },
-      { from: 310, file: "vo_310.mp3", text: "Employetics can. It sees burnout before you do." },
-      { from: 410, file: "vo_410.mp3", text: "Red means someone needs help." },
-      { from: 540, file: "vo_540.mp3", text: "One click balances the work." },
-      { from: 720, file: "vo_720.mp3", text: "Fair work. Happy team." },
-      { from: 1030, file: "vo_1030.mp3", text: "Employetics. Predict burnout. Keep your people." },
-    ] as const,
+    msgPopFrames: [95, 175, 255, 770] as readonly number[],
+    msgSentFrames: [130, 205, 305, 720] as readonly number[],
+    typingTickFrames: [
+      10, 14, 18, 22, 26, 30, 34, // S1 typing "I'm fine."
+      116, 120, 124, // MON typing dots
+      195, 199, 203, // WED reply cadence
+      277, 282, 287, 292, 297, // SAT longer typing dots
+    ] as readonly number[],
+    whooshSoftFrames: [72, 420, 670, 882] as readonly number[],
+    heartbeatFrame: 344,
+    chimeFrame: 850,
+    musicVolume: 0.25,
+    musicFadeOutStart: 1155, // gentle 1.5 s fade-out
   },
 } as const;
 
-/**
- * Verified landmark coordinates on public/team_burnout.png & public/workload_optimizer.png (1200x750).
- */
-export const SCREEN_TARGETS = {
-  teamBurnout: {
-    // Alex Rivera CORAL high-risk card: x=254..544 (c=399), y=150..416 (c=283)
-    riskCard: {
-      u: 399 / 1200,
-      v: 283 / 750,
-      w: 290 / 1200,
-      h: 266 / 750,
-    },
-    zoomOrigin: { ox: 0.28, oy: 0.30 },
-    zoomScale: 1.36,
-  },
-  workloadOptimizer: {
-    // "Optimise Workload" GREEN button: x=852..1132 (c=992), y=616..684 (c=650)
-    optimiseBtn: {
-      u: 992 / 1200,
-      v: 650 / 750,
-      w: 280 / 1200,
-      h: 68 / 750,
-    },
-    zoomOrigin: { ox: 0.85, oy: 0.82 },
-    zoomScale: 1.28,
-  },
+/** Verified normalized landmarks on public/self_awareness.png (1080x1080). */
+export const SELF_AWARENESS_TARGETS = {
+  // "Visible only to you" privacy subtitle pill
+  privacyBadge: { u: 0.5, v: 125 / 1080, w: 428 / 1080, h: 54 / 1080 },
+  // "Pattern Alerts" weekend-work alert box
+  patternAlert: { u: 0.5, v: 354 / 1080, w: 904 / 1080, h: 116 / 1080 },
+  // "Personal Risk Level" semicircular gauge card
+  riskGauge: { u: 0.5, v: 787 / 1080, w: 972 / 1080, h: 478 / 1080 },
 } as const;
+
+/** Color interpolation utility for smooth night-to-dawn gradients & contrast shifts. */
+export function lerpColor(hexA: string, hexB: string, t: number): string {
+  const u = Math.max(0, Math.min(1, t));
+  const parse = (hex: string): [number, number, number] => {
+    const clean = hex.replace("#", "");
+    return [
+      parseInt(clean.slice(0, 2), 16),
+      parseInt(clean.slice(2, 4), 16),
+      parseInt(clean.slice(4, 6), 16),
+    ];
+  };
+  const [r1, g1, b1] = parse(hexA);
+  const [r2, g2, b2] = parse(hexB);
+  const toHex = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  return `#${toHex(r1 + (r2 - r1) * u)}${toHex(g1 + (g2 - g1) * u)}${toHex(b1 + (b2 - b1) * u)}`;
+}

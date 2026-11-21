@@ -1,6 +1,6 @@
-# Employetics — `AdThree` (40s Vertical 9:16 Night-to-Dawn Ad)
+# Employetics — `AdThree` (40s Vertical 9:16 AI CV Screening & HR Chatbot Ad)
 
-Remotion v4 (React + TypeScript) intimate first-person vertical motion-graphics ad for **Employetics** — showing how burnout hides behind *"I'm fine."* and how Employetics' private self-awareness dashboard spots it before you do.
+Remotion v4 (React + TypeScript) intimate first-person vertical motion-graphics ad for **Employetics** — showing how HR teams reclaim their evenings with automated **AI CV Screening** and a **Customized HR Chatbot**.
 
 ## Technical Spec
 - **Composition ID:** `AdThree`
@@ -15,14 +15,18 @@ Remotion v4 (React + TypeScript) intimate first-person vertical motion-graphics 
 - `src/Root.tsx` & `src/AdThree.tsx` — Remotion root & master composition orchestrating all 6 scenes + audio
 - `src/scenes/` — `Scene1Hook.tsx`, `Scene2Week.tsx`, `Scene3Turn.tsx`, `Scene4App.tsx`, `Scene5Change.tsx`, `Scene6EndCard.tsx`
 - `src/lib/` — `ChatBubble.tsx`, `TypingDots.tsx`, `StatusBar.tsx`, `DayChip.tsx`, `Battery.tsx`, `AppWindow.tsx`, `FitText.tsx`, `LogoMark.tsx`, `Moon.tsx`, `Sun.tsx`, `fonts.ts`
-- `scripts/` — `make_sfx.py`, `make_self_awareness.py`, `sync_assets.mjs`, `package_for_colab.sh`
+- `scripts/` — `make_sfx.py`, `make_hr_screens.py`, `sync_assets.mjs`, `package_for_colab.sh`
 - `colab/render_ad.ipynb` — 5-cell Google Colab renderer
+
+## Optional Media Drop-Ins
+- Replace `public/cv_screening.png` or `public/hr_chatbot.png` with real screenshots, or place `public/app_demo.mp4` (`<OffthreadVideo>`).
+- Place `audio/music.mp3` to override the generated felt-piano score (auto-played at 25% volume with a 1.5s fade-out).
 
 ## Commands
 ```bash
 npm install
 npm run dev       # Launch Remotion Studio
-npm run still     # Render preview still: npm run still -- out/still.png --frame=380
+npm run still     # Render preview still: npm run still -- out/still.png --frame=450
 npm run render    # Render full 1080x1920 H.264 video -> out/ad3.mp4
 npm run build     # TypeScript check (tsc --noEmit)
 ```

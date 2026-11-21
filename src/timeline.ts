@@ -33,7 +33,7 @@ export const PALETTE = {
 /** Allowed on-screen copy (ONLY these strings appear in AdThree). */
 export const COPY = {
   // S1 HOOK
-  s1Hook: "I'm fine.",
+  s1Hook: "Still screening.",
 
   // Day chips
   dayMon: "MON",
@@ -48,32 +48,32 @@ export const COPY = {
   timeSun: "9:00 AM",
 
   // Exact chat bubbles
-  chatMonFriend: "How are you?",
-  chatMonSara: "I'm fine.",
-  chatWedFriend: "Dinner tonight?",
-  chatWedSara: "Can't. Work. I'm fine.",
-  chatSatFriend: "Are you OK?",
-  chatSatSara: "I'm fine.",
-  chatSunSara: "Honestly? I'm tired.",
-  chatSunFriend: "I'm coming over.",
+  chatMonIn: "Shortlist ready?",
+  chatMonOut: "Still screening 400 CVs.",
+  chatWedIn: "Quick HR data check?",
+  chatWedOut: "Hold on. Digging through files.",
+  chatSatIn: "Dinner tonight?",
+  chatSatOut: "Can't. Still screening.",
+  chatSunOut: "Shortlist sent. All questions answered.",
+  chatSunIn: "Brunch at 10?",
 
   // S3 THE TURN
-  s3Question: "But are you?",
+  s3Turn: "There's a better way.",
 
   // S4 THE APP
-  s4Line1: "It noticed.",
-  s4Line2: "Before you did.",
-  s4Private: "ONLY YOU CAN SEE THIS.",
+  s4Line1: "CVs ranked in seconds.",
+  s4Line2: "Ask your own HR data.",
+  s4Badge: "CUSTOMIZED HR CHATBOT.",
   s4DemoData: "DEMO DATA",
 
   // S5 THE CHANGE
-  s5Line1: "NOTICE YOURSELF.",
-  s5Line2: "BEFORE BURNOUT NOTICES YOU.",
+  s5Line1: "HIRE FASTER.",
+  s5Line2: "ASK ANYTHING. INSTANTLY.",
 
   // S6 END CARD
   s6WordmarkBold: "Employ",
   s6WordmarkRegular: "etics",
-  s6Slogan: "Predict burnout. Keep your people.",
+  s6Slogan: "Smarter HR. Explainable AI.",
 } as const;
 
 /** Exact global frame timeline at 30 fps (0..1199). */
@@ -84,7 +84,7 @@ export const TIMELINE = {
     end: 89,
     duration: 90,
     typeStart: 8,
-    typeEnd: 35,
+    typeEnd: 36,
     ghostFrames: [40, 48, 56] as readonly number[],
     morphStart: 70,
     morphEnd: 89,
@@ -96,20 +96,20 @@ export const TIMELINE = {
     end: 329,
     duration: 240,
     monStart: 90,
-    monFriend: 95,
+    monIncoming: 95,
     monTypingStart: 115,
     monTypingEnd: 128,
-    monSara: 130,
+    monReply: 130,
 
     wedStart: 170,
-    wedFriend: 175,
-    wedSara: 205,
+    wedIncoming: 175,
+    wedReply: 205,
 
     satStart: 250,
-    satFriend: 255,
+    satIncoming: 255,
     satTypingStart: 275,
     satTypingEnd: 300,
-    satSara: 305,
+    satReply: 305,
   },
 
   // S3 THE TURN: f330-419 (90 frames)
@@ -129,11 +129,11 @@ export const TIMELINE = {
     end: 689,
     duration: 270,
     windowRiseStart: 420,
-    zoomPatternStart: 440,
+    zoomCvStart: 440,
     line1At: 450,
-    panGaugeStart: 540,
+    crossfadeAt: 535,
     line2At: 550,
-    privateAt: 610,
+    chatbotFocusAt: 610,
     windowDownStart: 670,
     windowDownEnd: 689,
   },
@@ -145,7 +145,7 @@ export const TIMELINE = {
     duration: 330,
     dawnStart: 700,
     dawnEnd: 860,
-    saraBubble: 720,
+    hrBubble: 720,
     friendBubble: 770,
     chargeStart: 780,
     chargeEnd: 850,
@@ -171,17 +171,17 @@ export const TIMELINE = {
     sloganEnd: 1105,
   },
 
-  // Audio cue points (NO voice-over — intimate piano + subtle UI sounds only)
+  // Audio cue points (NO voice-over — intimate felt piano + subtle UI sounds)
   AUDIO: {
     msgPopFrames: [95, 175, 255, 770] as readonly number[],
     msgSentFrames: [130, 205, 305, 720] as readonly number[],
     typingTickFrames: [
-      10, 14, 18, 22, 26, 30, 34, // S1 typing "I'm fine."
+      10, 14, 18, 22, 26, 30, 34, // S1 typing "Still screening."
       116, 120, 124, // MON typing dots
       195, 199, 203, // WED reply cadence
       277, 282, 287, 292, 297, // SAT longer typing dots
     ] as readonly number[],
-    whooshSoftFrames: [72, 420, 670, 882] as readonly number[],
+    whooshSoftFrames: [72, 420, 535, 670, 882] as readonly number[],
     heartbeatFrame: 344,
     chimeFrame: 850,
     musicVolume: 0.25,
@@ -189,17 +189,25 @@ export const TIMELINE = {
   },
 } as const;
 
-/** Verified normalized landmarks on public/self_awareness.png (1080x1080). */
-export const SELF_AWARENESS_TARGETS = {
-  // "Visible only to you" privacy subtitle pill
-  privacyBadge: { u: 0.5, v: 125 / 1080, w: 428 / 1080, h: 54 / 1080 },
-  // "Pattern Alerts" weekend-work alert box
-  patternAlert: { u: 0.5, v: 354 / 1080, w: 904 / 1080, h: 116 / 1080 },
-  // "Personal Risk Level" semicircular gauge card
-  riskGauge: { u: 0.5, v: 787 / 1080, w: 972 / 1080, h: 478 / 1080 },
+/** Verified normalized landmarks on public/cv_screening.png & public/hr_chatbot.png (1080x1080). */
+export const HR_SCREEN_TARGETS = {
+  // Top-ranked candidate card (#1 Maya Chen, 97% Match) in cv_screening.png
+  topCandidate: {
+    u: 0.5,
+    v: 336 / 1080,
+    w: 960 / 1080,
+    h: 264 / 1080,
+  },
+  // AI Instant Reply panel in hr_chatbot.png
+  chatbotReplyPanel: {
+    u: 539 / 1080,
+    v: 646 / 1080,
+    w: 958 / 1080,
+    h: 536 / 1080,
+  },
 } as const;
 
-/** Color interpolation utility for smooth night-to-dawn gradients & contrast shifts. */
+/** Smooth color interpolation utility for night-to-dawn background & contrast shifts. */
 export function lerpColor(hexA: string, hexB: string, t: number): string {
   const u = Math.max(0, Math.min(1, t));
   const parse = (hex: string): [number, number, number] => {

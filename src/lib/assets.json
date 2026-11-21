@@ -1,5 +1,7 @@
 {
-  "hasSelfAwarenessScreen": true,
+  "hasAppDemoVideo": false,
+  "hasCvScreeningScreen": true,
+  "hasHrChatbotScreen": true,
   "hasCustomMusic": false,
   "sfx": {
     "msg_pop": true,

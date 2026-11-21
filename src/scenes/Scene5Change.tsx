@@ -24,7 +24,7 @@ export const Scene5Change: React.FC = () => {
 
   const dawnS = s5.dawnStart - s5.start; // 10 (f700)
   const dawnE = s5.dawnEnd - s5.start; // 170 (f860)
-  const saraAt = s5.saraBubble - s5.start; // 30 (f720)
+  const hrAt = s5.hrBubble - s5.start; // 30 (f720)
   const friendAt = s5.friendBubble - s5.start; // 80 (f770)
   const chargeS = s5.chargeStart - s5.start; // 90 (f780)
   const chargeE = s5.chargeEnd - s5.start; // 160 (f850)
@@ -57,8 +57,8 @@ export const Scene5Change: React.FC = () => {
       ? lerpColor(PALETTE.MIDNIGHT, twilightHorizon, dawnP / 0.4)
       : lerpColor(twilightHorizon, softGoldHorizon, (dawnP - 0.4) / 0.6);
 
-  // Status bar ink smoothly transitions CREAM -> NAVY once upper sky brightens cleanly
-  const inkBlend = interpolate(dawnP, [0.55, 0.80], [0, 1], {
+  // Status bar ink smoothly transitions CREAM -> NAVY slightly earlier so f800 mid-dawn stays crisp!
+  const inkBlend = interpolate(dawnP, [0.42, 0.64], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -207,8 +207,8 @@ export const Scene5Change: React.FC = () => {
             }}
           >
             <DayChip label={COPY.daySun} appearAt={6} bgColor={chipBg} textColor={statusInk} />
-            <ChatBubble text={COPY.chatSunSara} side="sara" appearAt={saraAt} />
-            <ChatBubble text={COPY.chatSunFriend} side="friend" appearAt={friendAt} />
+            <ChatBubble text={COPY.chatSunOut} side="sara" appearAt={hrAt} />
+            <ChatBubble text={COPY.chatSunIn} side="friend" appearAt={friendAt} />
           </div>
         </AbsoluteFill>
       )}

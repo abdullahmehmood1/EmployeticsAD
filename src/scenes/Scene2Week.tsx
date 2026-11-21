@@ -8,13 +8,13 @@ import { StatusBar } from "../lib/StatusBar";
 import { TypingDots } from "../lib/TypingDots";
 
 export interface WeekChatProps {
-  /** Render the complete frozen end state of S2 (used dimmed behind S3 "But are you?"). */
+  /** Render the complete frozen end state of S2 (dimmed behind S3 "There's a better way."). */
   frozenEnd?: boolean;
   dimOpacity?: number;
 }
 
 /**
- * S2 THE WEEK (f90-329): First-person vertical phone chat across MON -> WED -> SAT.
+ * S2 THE WEEK (f90-329): First-person HR Manager late-night chat across MON -> WED -> SAT.
  * Background slides DEEP -> MIDNIGHT -> #060F1F; battery drains 78% -> 41% -> 9% (AMBER <20%);
  * crescent moon grows softly in the upper-right corner.
  */
@@ -24,29 +24,27 @@ export const Scene2Week: React.FC<WeekChatProps> = ({ frozenEnd = false, dimOpac
   const frame = frozenEnd ? s2.duration - 1 : localFrame;
   const globalFrame = s2.start + frame;
 
-  // Local event triggers
   const monChip = 0; // f90
-  const monFriend = s2.monFriend - s2.start; // 5
-  const monTypeS = s2.monTypingStart - s2.start; // 25
-  const monTypeE = s2.monTypingEnd - s2.start; // 38
-  const monSara = s2.monSara - s2.start; // 40
+  const monIn = s2.monIncoming - s2.start; // 5 (f95)
+  const monTypeS = s2.monTypingStart - s2.start; // 25 (f115)
+  const monTypeE = s2.monTypingEnd - s2.start; // 38 (f128)
+  const monOut = s2.monReply - s2.start; // 40 (f130)
 
   const wedChip = s2.wedStart - s2.start; // 80 (f170)
-  const wedFriend = s2.wedFriend - s2.start; // 85
-  const wedSara = s2.wedSara - s2.start; // 115
+  const wedIn = s2.wedIncoming - s2.start; // 85 (f175)
+  const wedOut = s2.wedReply - s2.start; // 115 (f205)
 
   const satChip = s2.satStart - s2.start; // 160 (f250)
-  const satFriend = s2.satFriend - s2.start; // 165
-  const satTypeS = s2.satTypingStart - s2.start; // 185
-  const satTypeE = s2.satTypingEnd - s2.start; // 210
-  const satSara = s2.satSara - s2.start; // 215 (f305)
+  const satIn = s2.satIncoming - s2.start; // 165 (f255)
+  const satTypeS = s2.satTypingStart - s2.start; // 185 (f275)
+  const satTypeE = s2.satTypingEnd - s2.start; // 210 (f300)
+  const satOut = s2.satReply - s2.start; // 215 (f305)
 
-  // Background color arc: DEEP (#14284A) -> MIDNIGHT (#0B1B33) -> #060F1F
+  // Background slides DEEP (#14284A) -> MIDNIGHT (#0B1B33) -> #060F1F
   let bgColor: string;
   if (frame < wedChip) {
     bgColor = lerpColor(PALETTE.DEEP, PALETTE.MIDNIGHT, frame / wedChip);
   } else if (frame < satChip) {
-    bgColor = lerpColor(PALETTE.MIDNIGHT, PALETTE.MIDNIGHT, 0.5);
     bgColor = lerpColor(PALETTE.MIDNIGHT, PALETTE.NIGHT_DARK, ((frame - wedChip) / (satChip - wedChip)) * 0.45);
   } else {
     bgColor = lerpColor(
@@ -56,7 +54,6 @@ export const Scene2Week: React.FC<WeekChatProps> = ({ frozenEnd = false, dimOpac
     );
   }
 
-  // Time in status bar updates per day
   const statusTime =
     globalFrame >= s2.satStart
       ? COPY.timeSat
@@ -64,7 +61,6 @@ export const Scene2Week: React.FC<WeekChatProps> = ({ frozenEnd = false, dimOpac
       ? COPY.timeWed
       : COPY.timeMon;
 
-  // Battery drains smoothly 78% (MON) -> 41% (WED) -> 9% (SAT, turns AMBER <20%)
   const batteryPercent = interpolate(
     frame,
     [0, wedChip, satChip, s2.duration - 1],
@@ -76,13 +72,11 @@ export const Scene2Week: React.FC<WeekChatProps> = ({ frozenEnd = false, dimOpac
     }
   );
 
-  // Crescent moon grows steadily in the upper-right corner as nights grow later
   const moonGrowth = interpolate(frame, [0, s2.duration - 1], [0.1, 1.0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Subtle slow camera push-in (1.0 -> 1.028) for quiet emotional intimacy
   const cameraScale = frozenEnd
     ? 1.028
     : interpolate(frame, [0, s2.duration - 1], [1.0, 1.028], {
@@ -114,7 +108,7 @@ export const Scene2Week: React.FC<WeekChatProps> = ({ frozenEnd = false, dimOpac
         {/* Top phone status bar (time + draining battery icon) */}
         <StatusBar time={statusTime} batteryPercent={batteryPercent} inkColor={PALETTE.CREAM} />
 
-        {/* Minimal contact header: plain circle avatar, zero photo, zero extra text */}
+        {/* Clean chat header: plain circle avatar, zero photo, zero extra text */}
         <div
           style={{
             position: "absolute",
@@ -167,30 +161,30 @@ export const Scene2Week: React.FC<WeekChatProps> = ({ frozenEnd = false, dimOpac
             bottom: VIDEO.height - VIDEO.safeBottom,
             display: "flex",
             flexDirection: "column",
-            gap: 18,
+            gap: 16,
           }}
         >
           {/* MON 9:02 PM */}
           <DayChip label={COPY.dayMon} appearAt={frozenEnd ? -100 : monChip} />
-          <ChatBubble text={COPY.chatMonFriend} side="friend" appearAt={frozenEnd ? -100 : monFriend} />
+          <ChatBubble text={COPY.chatMonIn} side="friend" appearAt={frozenEnd ? -100 : monIn} />
           {!frozenEnd && <TypingDots startAt={monTypeS} endAt={monTypeE} side="sara" />}
-          <ChatBubble text={COPY.chatMonSara} side="sara" appearAt={frozenEnd ? -100 : monSara} />
+          <ChatBubble text={COPY.chatMonOut} side="sara" appearAt={frozenEnd ? -100 : monOut} />
 
           {/* WED 11:48 PM */}
-          <div style={{ height: 10 }} />
+          <div style={{ height: 8 }} />
           <DayChip label={COPY.dayWed} appearAt={frozenEnd ? -100 : wedChip} />
-          <ChatBubble text={COPY.chatWedFriend} side="friend" appearAt={frozenEnd ? -100 : wedFriend} />
-          <ChatBubble text={COPY.chatWedSara} side="sara" appearAt={frozenEnd ? -100 : wedSara} />
+          <ChatBubble text={COPY.chatWedIn} side="friend" appearAt={frozenEnd ? -100 : wedIn} />
+          <ChatBubble text={COPY.chatWedOut} side="sara" appearAt={frozenEnd ? -100 : wedOut} />
 
           {/* SAT 10:15 PM */}
-          <div style={{ height: 10 }} />
+          <div style={{ height: 8 }} />
           <DayChip label={COPY.daySat} appearAt={frozenEnd ? -100 : satChip} />
-          <ChatBubble text={COPY.chatSatFriend} side="friend" appearAt={frozenEnd ? -100 : satFriend} />
+          <ChatBubble text={COPY.chatSatIn} side="friend" appearAt={frozenEnd ? -100 : satIn} />
           {!frozenEnd && <TypingDots startAt={satTypeS} endAt={satTypeE} side="sara" />}
           <ChatBubble
-            text={COPY.chatSatSara}
+            text={COPY.chatSatOut}
             side="sara"
-            appearAt={frozenEnd ? -100 : satSara}
+            appearAt={frozenEnd ? -100 : satOut}
             quiet
           />
         </div>

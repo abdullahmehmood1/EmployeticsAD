@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Scans public/ and audio/ and writes src/lib/assets.json for AdThree:
- * - Whether public/self_awareness.png exists
+ * - Whether public/cv_screening.png, public/hr_chatbot.png, and public/app_demo.mp4 exist
  * - Whether audio/music.mp3 or public/sfx/music.wav exists
  * - Which public/sfx/*.wav files exist
- * Mirrors optional root audio/music.mp3 into public/audio/ so staticFile() can serve it.
+ * Mirrors optional root audio/music.mp3 into public/audio/.
  */
 
 import fs from "node:fs";
@@ -44,7 +44,9 @@ const sfx = sfxNames.reduce((acc, name) => {
 }, {});
 
 const manifest = {
-  hasSelfAwarenessScreen: has("self_awareness.png"),
+  hasAppDemoVideo: has("app_demo.mp4"),
+  hasCvScreeningScreen: has("cv_screening.png"),
+  hasHrChatbotScreen: has("hr_chatbot.png"),
   hasCustomMusic: has(path.join("audio", "music.mp3")),
   sfx,
 };

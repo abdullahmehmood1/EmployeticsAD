@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 /**
  * Scans public/ and audio/ and writes src/lib/assets.json so Remotion knows at bundle time:
- * - Whether public/app_demo.mp4 exists (uses <OffthreadVideo>) or public/attrition_screen.png
+ * - Whether public/app_demo.mp4, public/team_burnout.png, public/workload_optimizer.png exist
  * - Whether audio/voiceover.mp3 or public/audio/vo/*.mp3 exist
- * - Whether audio/music.mp3 exists
+ * - Whether audio/music.mp3 or public/sfx/music_loop.wav exist
  * - Which public/sfx/*.wav files exist
- * If audio/voiceover.mp3 or audio/music.mp3 exist at project root, copies them to public/audio/
- * so staticFile() can serve them seamlessly.
+ * Mirrors optional root audio/voiceover.mp3 and audio/music.mp3 into public/audio/.
  */
 
 import fs from "node:fs";
@@ -23,7 +22,6 @@ const outJson = path.join(rootDir, "src", "lib", "assets.json");
 fs.mkdirSync(publicAudioDir, { recursive: true });
 fs.mkdirSync(path.dirname(outJson), { recursive: true });
 
-// Mirror optional root audio/voiceover.mp3 and audio/music.mp3 into public/audio/
 for (const fname of ["voiceover.mp3", "music.mp3"]) {
   const src = path.join(audioRootDir, fname);
   const dst = path.join(publicAudioDir, fname);
@@ -34,25 +32,30 @@ for (const fname of ["voiceover.mp3", "music.mp3"]) {
 
 const has = (relToPublic) => fs.existsSync(path.join(publicDir, relToPublic));
 
-const voClips = ["vo_10.mp3", "vo_100.mp3", "vo_345.mp3", "vo_495.mp3", "vo_875.mp3", "vo_1045.mp3"].filter(
-  (f) => has(path.join("audio", "vo", f))
-);
+const voClips = [
+  "vo_12.mp3",
+  "vo_110.mp3",
+  "vo_310.mp3",
+  "vo_410.mp3",
+  "vo_540.mp3",
+  "vo_720.mp3",
+  "vo_1030.mp3",
+].filter((f) => has(path.join("audio", "vo", f)));
 
-const sfxFiles = ["impact.wav", "whoosh.wav", "tick.wav", "charge.wav", "chime.wav"].reduce(
-  (acc, f) => {
-    acc[f.replace(".wav", "")] = has(path.join("sfx", f));
-    return acc;
-  },
-  {}
-);
+const sfxNames = ["pop", "whoosh", "ding", "thud", "sparkle", "click", "music_loop"];
+const sfx = sfxNames.reduce((acc, name) => {
+  acc[name] = has(path.join("sfx", `${name}.wav`));
+  return acc;
+}, {});
 
 const manifest = {
   hasAppDemoVideo: has("app_demo.mp4"),
-  hasAttritionScreen: has("attrition_screen.png"),
+  hasTeamBurnoutScreen: has("team_burnout.png"),
+  hasWorkloadOptimizerScreen: has("workload_optimizer.png"),
   hasCustomVoiceover: has(path.join("audio", "voiceover.mp3")),
-  hasMusic: has(path.join("audio", "music.mp3")),
+  hasCustomMusic: has(path.join("audio", "music.mp3")),
   voClips,
-  sfx: sfxFiles,
+  sfx,
 };
 
 fs.writeFileSync(outJson, JSON.stringify(manifest, null, 2) + "\n", "utf8");

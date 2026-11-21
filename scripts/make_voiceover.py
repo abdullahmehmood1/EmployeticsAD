@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate separate voice-over clips for Employetics AdOne using Microsoft edge-tts
-(voice: en-US-GuyNeural, slightly slow, deep, confident).
-Outputs clips into public/audio/vo/ and updates src/lib/assets.json via sync_assets.mjs.
+Generate warm, friendly voice-over clips for Employetics AdTwo using edge-tts
+(voice: en-US-JennyNeural, warm, smiling, medium pace).
+Outputs into public/audio/vo/ and updates src/lib/assets.json.
 """
 
 from __future__ import annotations
@@ -16,17 +16,18 @@ import edge_tts
 ROOT_DIR = Path(__file__).resolve().parent.parent
 VO_DIR = ROOT_DIR / "public" / "audio" / "vo"
 
-VOICE = "en-US-GuyNeural"
-RATE = "-6%"
-PITCH = "-4Hz"
+VOICE = "en-US-JennyNeural"
+RATE = "+0%"
+PITCH = "+2Hz"
 
 CLIPS = [
-    ("vo_10.mp3", "Your best employee just quit."),
-    ("vo_100.mp3", "Late nights. Lost weekends. Nobody noticed."),
-    ("vo_345.mp3", "Meet Employetics. AI that spots burnout before people quit."),
-    ("vo_495.mp3", "See who's at risk. And exactly why."),
-    ("vo_875.mp3", "Act early. Keep your people."),
-    ("vo_1045.mp3", "Employetics."),
+    ("vo_12.mp3", "One of them is about to burn out."),
+    ("vo_110.mp3", "Can you tell which one?"),
+    ("vo_310.mp3", "Employetics can. It sees burnout before you do."),
+    ("vo_410.mp3", "Red means someone needs help."),
+    ("vo_540.mp3", "One click balances the work."),
+    ("vo_720.mp3", "Fair work. Happy team."),
+    ("vo_1030.mp3", "Employetics. Predict burnout. Keep your people."),
 ]
 
 

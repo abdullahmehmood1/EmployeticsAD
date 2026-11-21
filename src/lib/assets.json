@@ -1,14 +1,17 @@
 {
   "hasAppDemoVideo": false,
-  "hasAttritionScreen": true,
+  "hasTeamBurnoutScreen": true,
+  "hasWorkloadOptimizerScreen": true,
   "hasCustomVoiceover": false,
-  "hasMusic": false,
+  "hasCustomMusic": false,
   "voClips": [],
   "sfx": {
-    "impact": true,
+    "pop": true,
     "whoosh": true,
-    "tick": true,
-    "charge": true,
-    "chime": true
+    "ding": true,
+    "thud": true,
+    "sparkle": true,
+    "click": true,
+    "music_loop": true
   }
 }
